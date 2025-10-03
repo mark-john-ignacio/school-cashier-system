@@ -14,17 +14,17 @@ interface Student {
     id: number;
     student_number: string;
     first_name: string;
-    middle_name: string | null;
+    middle_name?: string | null;
     last_name: string;
     grade_level: string;
     section: string;
-    contact_number: string | null;
-    email: string | null;
-    parent_name: string | null;
-    parent_contact: string | null;
-    parent_email: string | null;
+    contact_number?: string | null;
+    email?: string | null;
+    parent_name?: string | null;
+    parent_contact?: string | null;
+    parent_email?: string | null;
     status: 'active' | 'inactive' | 'graduated';
-    notes: string | null;
+    notes?: string | null;
 }
 
 interface PageProps extends Record<string, unknown> {
@@ -43,9 +43,6 @@ export default function EditStudent() {
         {
             title: student.student_number,
             href: showStudent({ student: student.id }).url,
-        },
-        {
-            title: 'Edit',
         },
     ];
 
@@ -72,7 +69,7 @@ export default function EditStudent() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit ${student.first_name} ${student.last_name}`} />
+            <Head title={`Edit ${student.student_number}`} />
 
             <div className="flex flex-col gap-6">
                 <div>
@@ -104,7 +101,10 @@ export default function EditStudent() {
 
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="status">Status</Label>
-                                <Select value={data.status} onValueChange={(value) => setData('status', value as 'active' | 'inactive' | 'graduated')}>
+                                <Select
+                                    value={data.status}
+                                    onValueChange={(value) => setData('status', value as 'active' | 'inactive' | 'graduated')}
+                                >
                                     <SelectTrigger id="status">
                                         <SelectValue />
                                     </SelectTrigger>
@@ -160,18 +160,35 @@ export default function EditStudent() {
                                 <Label htmlFor="section">
                                     Section <span className="text-red-500">*</span>
                                 </Label>
-                                <Input id="section" value={data.section} onChange={(e) => setData('section', e.target.value)} placeholder="A" required />
+                                <Input
+                                    id="section"
+                                    value={data.section}
+                                    onChange={(e) => setData('section', e.target.value)}
+                                    placeholder="A"
+                                    required
+                                />
                                 {errors.section && <p className="text-sm text-red-500">{errors.section}</p>}
                             </div>
 
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="contact_number">Contact Number</Label>
-                                <Input id="contact_number" value={data.contact_number} onChange={(e) => setData('contact_number', e.target.value)} placeholder="09123456789" />
+                                <Input
+                                    id="contact_number"
+                                    value={data.contact_number}
+                                    onChange={(e) => setData('contact_number', e.target.value)}
+                                    placeholder="09123456789"
+                                />
                             </div>
 
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} placeholder="student@email.com" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={data.email}
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    placeholder="student@email.com"
+                                />
                             </div>
                         </div>
                     </div>
@@ -190,12 +207,23 @@ export default function EditStudent() {
 
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="parent_contact">Parent/Guardian Contact</Label>
-                                <Input id="parent_contact" value={data.parent_contact} onChange={(e) => setData('parent_contact', e.target.value)} placeholder="09123456789" />
+                                <Input
+                                    id="parent_contact"
+                                    value={data.parent_contact}
+                                    onChange={(e) => setData('parent_contact', e.target.value)}
+                                    placeholder="09123456789"
+                                />
                             </div>
 
                             <div className="flex flex-col gap-2 md:col-span-2">
                                 <Label htmlFor="parent_email">Parent/Guardian Email</Label>
-                                <Input id="parent_email" type="email" value={data.parent_email} onChange={(e) => setData('parent_email', e.target.value)} placeholder="parent@email.com" />
+                                <Input
+                                    id="parent_email"
+                                    type="email"
+                                    value={data.parent_email}
+                                    onChange={(e) => setData('parent_email', e.target.value)}
+                                    placeholder="parent@email.com"
+                                />
                             </div>
                         </div>
                     </div>
@@ -208,7 +236,13 @@ export default function EditStudent() {
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="notes">Notes</Label>
-                            <Textarea id="notes" value={data.notes} onChange={(e) => setData('notes', e.target.value)} rows={4} placeholder="Enter any additional notes..." />
+                            <Textarea
+                                id="notes"
+                                value={data.notes}
+                                onChange={(e) => setData('notes', e.target.value)}
+                                rows={4}
+                                placeholder="Enter any additional notes..."
+                            />
                         </div>
                     </div>
 
@@ -217,7 +251,7 @@ export default function EditStudent() {
                             <Link href={showStudent({ student: student.id }).url}>Cancel</Link>
                         </Button>
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Updating...' : 'Update Student'}
+                            {processing ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>
                 </form>

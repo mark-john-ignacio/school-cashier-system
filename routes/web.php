@@ -18,8 +18,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('students', StudentController::class);
 
     // Payment Processing Routes
-    Route::resource('payments', PaymentController::class);
-    Route::get('payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+    Route::resource('payments', PaymentController::class)->except(['edit', 'update']);
+    Route::post('payments/{payment}/print', [PaymentController::class, 'print'])->name('payments.print');
 });
 
 require __DIR__.'/settings.php';

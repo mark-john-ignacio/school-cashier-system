@@ -2,30 +2,29 @@ import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { destroy as destroyStudent, edit as editStudent, index as indexStudents } from '@/routes/students';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { CalendarIcon, EditIcon, MailIcon, PhoneIcon, TrashIcon, UserIcon } from 'lucide-react';
+import { Calendar, Mail, MapPin, Phone, User } from 'lucide-react';
 
 interface Student {
     id: number;
     student_number: string;
     full_name: string;
     first_name: string;
-    middle_name: string | null;
+    middle_name?: string | null;
     last_name: string;
     grade_level: string;
     section: string;
-    contact_number: string | null;
-    email: string | null;
-    parent_name: string | null;
-    parent_contact: string | null;
-    parent_email: string | null;
+    contact_number?: string | null;
+    email?: string | null;
+    parent_name?: string | null;
+    parent_contact?: string | null;
+    parent_email?: string | null;
     status: 'active' | 'inactive' | 'graduated';
-    notes: string | null;
+    notes?: string | null;
     total_paid: number;
     expected_fees: number;
     balance: number;
@@ -40,7 +39,7 @@ interface Payment {
     payment_date: string;
     payment_purpose: string;
     payment_method: string;
-    notes: string | null;
+    notes?: string | null;
     cashier_name: string;
     created_at: string;
 }
@@ -89,22 +88,21 @@ export default function ShowStudent() {
         },
         {
             title: student.student_number,
+            href: '',
         },
     ];
 
     const handleDelete = () => {
-        if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
-            return;
+        if (confirm('Are you sure you want to deactivate this student? This action can be reversed later.')) {
+            setIsDeleting(true);
+            router.delete(destroyStudent({ student: student.id }).url, {
+                onFinish: () => setIsDeleting(false),
+            });
         }
-
-        setIsDeleting(true);
-        router.delete(destroyStudent({ student: student.id }).url, {
-            onFinish: () => setIsDeleting(false),
-        });
     };
 
-    const canEditStudents = auth?.user?.can?.editStudents ?? false;
-    const canDeleteStudents = auth?.user?.can?.deleteStudents ?? false;
+    const canEdit = auth?.user?.can?.editStudents ?? false;
+    const canDelete = auth?.user?.can?.deleteStudents ?? false;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -113,217 +111,206 @@ export default function ShowStudent() {
             <div className="flex flex-col gap-6">
                 {/* Header */}
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-                    <div>
-                        <h1 className="text-2xl font-semibold">{student.full_name}</h1>
-                        <p className="text-sm text-muted-foreground">{student.student_number}</p>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-semibold">{student.full_name}</h1>
+                            <Badge className={getStatusColor(student.status)}>
+                                {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                            </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">Student Number: {student.student_number}</p>
                     </div>
 
-                    <div className="flex gap-2">
-                        {canEditStudents && (
+                    <div className="flex gap-3">
+                        {canEdit && (
                             <Button variant="outline" asChild>
-                                <Link href={editStudent({ student: student.id }).url}>
-                                    <EditIcon className="mr-2 h-4 w-4" />
-                                    Edit
-                                </Link>
+                                <Link href={editStudent({ student: student.id }).url}>Edit Student</Link>
                             </Button>
                         )}
-                        {canDeleteStudents && (
+                        {canDelete && student.status === 'active' && (
                             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-                                <TrashIcon className="mr-2 h-4 w-4" />
-                                {isDeleting ? 'Deleting...' : 'Delete'}
+                                {isDeleting ? 'Deactivating...' : 'Deactivate'}
                             </Button>
                         )}
                     </div>
                 </div>
 
-                {/* Status Cards */}
-                <div className="grid gap-4 md:grid-cols-4">
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardDescription>Expected Fees</CardDescription>
-                            <CardTitle className="text-2xl">₱{student.expected_fees.toLocaleString(undefined, { minimumFractionDigits: 2 })}</CardTitle>
-                        </CardHeader>
-                    </Card>
+                {/* Payment Summary Cards */}
+                <div className="grid gap-4 md:grid-cols-3">
+                    <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+                        <p className="text-sm text-muted-foreground">Expected Fees</p>
+                        <p className="text-2xl font-semibold">₱{student.expected_fees.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    </div>
 
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardDescription>Total Paid</CardDescription>
-                            <CardTitle className="text-2xl text-green-600 dark:text-green-400">
-                                ₱{student.total_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </CardTitle>
-                        </CardHeader>
-                    </Card>
+                    <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+                        <p className="text-sm text-muted-foreground">Total Paid</p>
+                        <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
+                            ₱{student.total_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </p>
+                    </div>
 
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardDescription>Balance</CardDescription>
-                            <CardTitle className={`text-2xl ${student.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                                ₱{Math.abs(student.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </CardTitle>
-                        </CardHeader>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardDescription>Payment Status</CardDescription>
-                            <div className="pt-2">
-                                <Badge className={getPaymentStatusColor(student.payment_status)}>
-                                    {student.payment_status.charAt(0).toUpperCase() + student.payment_status.slice(1)}
-                                </Badge>
-                            </div>
-                        </CardHeader>
-                    </Card>
+                    <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm text-muted-foreground">Balance</p>
+                            <Badge className={getPaymentStatusColor(student.payment_status)}>
+                                {student.payment_status.charAt(0).toUpperCase() + student.payment_status.slice(1)}
+                            </Badge>
+                        </div>
+                        <p
+                            className={`text-2xl font-semibold ${student.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}
+                        >
+                            ₱{Math.abs(student.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Student Information */}
                 <div className="grid gap-6 md:grid-cols-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Student Information</CardTitle>
-                            <CardDescription>Personal and enrollment details</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid gap-4">
-                            <div className="grid grid-cols-3 gap-2">
-                                <div className="text-sm text-muted-foreground">Grade Level:</div>
-                                <div className="col-span-2 text-sm font-medium">{student.grade_level}</div>
+                    {/* Personal Information */}
+                    <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
+                        <h2 className="text-lg font-semibold">Personal Information</h2>
+
+                        <div className="grid gap-3">
+                            <div className="flex items-start gap-3">
+                                <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                <div className="flex flex-col gap-1">
+                                    <p className="text-sm text-muted-foreground">Full Name</p>
+                                    <p className="font-medium">{student.full_name}</p>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2">
-                                <div className="text-sm text-muted-foreground">Section:</div>
-                                <div className="col-span-2 text-sm font-medium">{student.section}</div>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-2">
-                                <div className="text-sm text-muted-foreground">Status:</div>
-                                <div className="col-span-2">
-                                    <Badge className={getStatusColor(student.status)}>{student.status.charAt(0).toUpperCase() + student.status.slice(1)}</Badge>
+                            <div className="flex items-start gap-3">
+                                <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                <div className="flex flex-col gap-1">
+                                    <p className="text-sm text-muted-foreground">Grade & Section</p>
+                                    <p className="font-medium">
+                                        {student.grade_level} - Section {student.section}
+                                    </p>
                                 </div>
                             </div>
 
                             {student.contact_number && (
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div className="text-sm text-muted-foreground flex items-center">
-                                        <PhoneIcon className="mr-1 h-3 w-3" />
-                                        Contact:
+                                <div className="flex items-start gap-3">
+                                    <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm text-muted-foreground">Contact Number</p>
+                                        <p className="font-medium">{student.contact_number}</p>
                                     </div>
-                                    <div className="col-span-2 text-sm font-medium">{student.contact_number}</div>
                                 </div>
                             )}
 
                             {student.email && (
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div className="text-sm text-muted-foreground flex items-center">
-                                        <MailIcon className="mr-1 h-3 w-3" />
-                                        Email:
+                                <div className="flex items-start gap-3">
+                                    <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                    <div className="flex flex-col gap-1">
+                                        <p className="text-sm text-muted-foreground">Email</p>
+                                        <p className="font-medium">{student.email}</p>
                                     </div>
-                                    <div className="col-span-2 text-sm font-medium">{student.email}</div>
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-3 gap-2">
-                                <div className="text-sm text-muted-foreground flex items-center">
-                                    <CalendarIcon className="mr-1 h-3 w-3" />
-                                    Enrolled:
+                            <div className="flex items-start gap-3">
+                                <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                <div className="flex flex-col gap-1">
+                                    <p className="text-sm text-muted-foreground">Enrolled Since</p>
+                                    <p className="font-medium">{format(new Date(student.created_at), 'MMMM d, yyyy')}</p>
                                 </div>
-                                <div className="col-span-2 text-sm font-medium">{format(new Date(student.created_at), 'MMM d, yyyy')}</div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Parent/Guardian Information</CardTitle>
-                            <CardDescription>Contact details for parent or guardian</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid gap-4">
+                    {/* Parent/Guardian Information */}
+                    <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
+                        <h2 className="text-lg font-semibold">Parent/Guardian Information</h2>
+
+                        <div className="grid gap-3">
                             {student.parent_name ? (
                                 <>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div className="text-sm text-muted-foreground flex items-center">
-                                            <UserIcon className="mr-1 h-3 w-3" />
-                                            Name:
+                                    <div className="flex items-start gap-3">
+                                        <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                        <div className="flex flex-col gap-1">
+                                            <p className="text-sm text-muted-foreground">Name</p>
+                                            <p className="font-medium">{student.parent_name}</p>
                                         </div>
-                                        <div className="col-span-2 text-sm font-medium">{student.parent_name}</div>
                                     </div>
 
                                     {student.parent_contact && (
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <div className="text-sm text-muted-foreground flex items-center">
-                                                <PhoneIcon className="mr-1 h-3 w-3" />
-                                                Contact:
+                                        <div className="flex items-start gap-3">
+                                            <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                            <div className="flex flex-col gap-1">
+                                                <p className="text-sm text-muted-foreground">Contact Number</p>
+                                                <p className="font-medium">{student.parent_contact}</p>
                                             </div>
-                                            <div className="col-span-2 text-sm font-medium">{student.parent_contact}</div>
                                         </div>
                                     )}
 
                                     {student.parent_email && (
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <div className="text-sm text-muted-foreground flex items-center">
-                                                <MailIcon className="mr-1 h-3 w-3" />
-                                                Email:
+                                        <div className="flex items-start gap-3">
+                                            <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                            <div className="flex flex-col gap-1">
+                                                <p className="text-sm text-muted-foreground">Email</p>
+                                                <p className="font-medium">{student.parent_email}</p>
                                             </div>
-                                            <div className="col-span-2 text-sm font-medium">{student.parent_email}</div>
                                         </div>
                                     )}
                                 </>
                             ) : (
-                                <div className="text-sm text-muted-foreground">No parent/guardian information provided.</div>
+                                <p className="text-sm text-muted-foreground">No parent/guardian information available.</p>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Notes */}
                 {student.notes && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Notes</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{student.notes}</p>
-                        </CardContent>
-                    </Card>
+                    <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
+                        <h2 className="text-lg font-semibold">Additional Notes</h2>
+                        <p className="text-sm text-muted-foreground">{student.notes}</p>
+                    </div>
                 )}
 
                 {/* Payment History */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Payment History</CardTitle>
-                        <CardDescription>{paymentHistory.length} payment(s) on record</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {paymentHistory.length === 0 ? (
-                            <div className="py-8 text-center text-sm text-muted-foreground">No payments recorded yet.</div>
-                        ) : (
-                            <div className="overflow-hidden rounded-lg border">
-                                <table className="min-w-full divide-y divide-border text-left text-sm">
-                                    <thead className="bg-muted/40 text-muted-foreground">
-                                        <tr>
-                                            <th className="px-4 py-3 font-medium">Receipt</th>
-                                            <th className="px-4 py-3 font-medium">Date</th>
-                                            <th className="px-4 py-3 font-medium">Purpose</th>
-                                            <th className="px-4 py-3 font-medium">Amount</th>
-                                            <th className="px-4 py-3 font-medium">Cashier</th>
+                <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">Payment History</h2>
+                        <p className="text-sm text-muted-foreground">{paymentHistory.length} transactions</p>
+                    </div>
+
+                    {paymentHistory.length === 0 ? (
+                        <p className="py-8 text-center text-sm text-muted-foreground">No payment history available.</p>
+                    ) : (
+                        <div className="overflow-hidden rounded-lg border border-border/60">
+                            <table className="min-w-full divide-y divide-border/70 text-left text-sm">
+                                <thead className="bg-muted/40 text-muted-foreground">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium">Date</th>
+                                        <th className="px-4 py-3 font-medium">Receipt</th>
+                                        <th className="px-4 py-3 font-medium">Purpose</th>
+                                        <th className="px-4 py-3 font-medium">Method</th>
+                                        <th className="px-4 py-3 font-medium">Cashier</th>
+                                        <th className="px-4 py-3 text-right font-medium">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/60">
+                                    {paymentHistory.map((payment) => (
+                                        <tr key={payment.id} className="hover:bg-muted/40">
+                                            <td className="px-4 py-3">{format(new Date(payment.payment_date), 'MMM d, yyyy')}</td>
+                                            <td className="px-4 py-3">
+                                                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{payment.receipt_number}</code>
+                                            </td>
+                                            <td className="px-4 py-3">{payment.payment_purpose}</td>
+                                            <td className="px-4 py-3 capitalize">{payment.payment_method}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{payment.cashier_name}</td>
+                                            <td className="px-4 py-3 text-right font-medium">
+                                                ₱{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border">
-                                        {paymentHistory.map((payment) => (
-                                            <tr key={payment.id} className="hover:bg-muted/40">
-                                                <td className="px-4 py-3 font-mono text-xs">{payment.receipt_number}</td>
-                                                <td className="px-4 py-3">{format(new Date(payment.payment_date), 'MMM d, yyyy')}</td>
-                                                <td className="px-4 py-3">
-                                                    <Badge variant="secondary">{payment.payment_purpose}</Badge>
-                                                </td>
-                                                <td className="px-4 py-3 font-medium">₱{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                                <td className="px-4 py-3 text-muted-foreground">{payment.cashier_name}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
         </AppLayout>
     );

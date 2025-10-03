@@ -19,9 +19,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         title: 'Students',
         href: indexStudents().url,
     },
-    {
-        title: 'Add Student',
-    },
 ];
 
 export default function CreateStudent() {
