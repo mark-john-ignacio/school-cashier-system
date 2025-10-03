@@ -13,11 +13,26 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Create admin user
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Admin User',
+            'email' => 'admin@school.test',
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        // Create cashier user
+        User::factory()->create([
+            'name' => 'Cashier User',
+            'email' => 'cashier@school.test',
+            'role' => 'cashier',
+            'is_active' => true,
+        ]);
+
+        // Seed fee structures first
+        $this->call([
+            FeeStructureSeeder::class,
+            StudentSeeder::class,
         ]);
     }
 }
