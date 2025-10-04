@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
+    private const PAYMENT_METHOD_OPTIONS = [
+        ['value' => 'cash', 'label' => 'Cash'],
+        ['value' => 'check', 'label' => 'Check'],
+        ['value' => 'online', 'label' => 'Online'],
+    ];
+
     public function __construct()
     {
         $this->middleware('permission:view payments')->only(['index', 'show']);
@@ -88,10 +95,24 @@ class PaymentController extends Controller
         // Get payment purposes for filter
         $purposes = Payment::select('payment_purpose')->distinct()->pluck('payment_purpose');
 
+        $cashiers = User::permission(['view payments', 'create payments'])
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get()
+            ->unique('id')
+            ->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+            ])
+            ->values()
+            ->all();
+
         return Inertia::render('payments/index', [
             'payments' => $payments,
             'filters' => $request->only(['search', 'date_from', 'date_to', 'purpose', 'cashier_id', 'payment_method']),
             'purposes' => $purposes,
+            'cashiers' => $cashiers,
+            'paymentMethods' => self::PAYMENT_METHOD_OPTIONS,
         ]);
     }
 
@@ -118,6 +139,29 @@ class PaymentController extends Controller
             }
         }
 
+        $studentsQuery = Student::query()
+            ->select('id', 'student_number', 'first_name', 'middle_name', 'last_name', 'grade_level', 'section')
+            ->orderBy('last_name');
+
+        if ($request->filled('search')) {
+            $studentsQuery->search($request->string('search'));
+        } else {
+            $studentsQuery->latest();
+        }
+
+        $students = $studentsQuery
+            ->limit(10)
+            ->get()
+            ->map(fn (Student $studentOption) => [
+                'id' => $studentOption->id,
+                'student_number' => $studentOption->student_number,
+                'full_name' => $studentOption->full_name,
+                'grade_level' => $studentOption->grade_level,
+                'section' => $studentOption->section,
+                'balance' => $studentOption->balance,
+            ])
+            ->all();
+
         $paymentPurposes = [
             'Tuition Fee',
             'Miscellaneous Fee',
@@ -132,6 +176,9 @@ class PaymentController extends Controller
         return Inertia::render('payments/create', [
             'student' => $student,
             'paymentPurposes' => $paymentPurposes,
+            'students' => $students,
+            'search' => $request->string('search')->toString(),
+            'paymentMethods' => self::PAYMENT_METHOD_OPTIONS,
         ]);
     }
 
@@ -200,10 +247,8 @@ class PaymentController extends Controller
     {
         $payment->markAsPrinted();
 
-        return response()->json([
-            'message' => 'Receipt marked as printed',
-            'printed_at' => $payment->printed_at,
-        ]);
+        return redirect()->route('payments.show', $payment)
+            ->with('success', 'Receipt marked as printed.');
     }
 
     /**

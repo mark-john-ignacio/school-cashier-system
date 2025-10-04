@@ -46,6 +46,13 @@ interface PageProps extends Record<string, unknown> {
     };
     gradeLevels: string[];
     sections: string[];
+    auth: {
+        user?: {
+            can?: {
+                createStudents?: boolean;
+            };
+        };
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [

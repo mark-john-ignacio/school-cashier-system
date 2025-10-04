@@ -1,68 +1,82 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { Pagination } from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { create as createPayment, index as indexPayments } from '@/routes/payments';
+import { create as createPayment, index as indexPayments, show as showPayment } from '@/routes/payments';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 
-interface StudentOption {
+interface PaymentListItem {
     id: number;
-    full_name: string;
-    student_number: string;
-}
-
-interface AcademicYearOption {
-    id: number;
-    name: string;
-}
-
-interface PaymentSummary {
-    id: number;
+    receipt_number: string;
     amount: number;
-    currency: string;
-    status: string;
-    purpose: string | null;
-    paid_at: string | null;
-    receipt_number: string | null;
+    payment_date: string;
+    payment_purpose: string;
+    payment_method: string;
+    notes?: string | null;
     student: {
         id: number;
-        full_name: string;
         student_number: string;
+        full_name: string;
     };
-    enrollment: {
-        grade_level: { id: number; name: string } | null;
-        section: { id: number; name: string } | null;
-        academic_year: { id: number; name: string } | null;
+    cashier: {
+        id: number;
+        name: string;
     } | null;
-    cashier: { id: number; name: string } | null;
+    is_printed: boolean;
+    created_at: string;
+}
+
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
 }
 
 interface PaginatedPayments {
-    data: PaymentSummary[];
-    links: { url: string | null; label: string; active: boolean }[];
+    data: PaymentListItem[];
+    links: PaginationLink[];
     from?: number;
     to?: number;
     total?: number;
 }
 
+interface CashierOption {
+    id: number;
+    name: string;
+}
+
+interface PaymentMethodOption {
+    value: string;
+    label: string;
+}
+
 interface PageProps extends Record<string, unknown> {
     payments: PaginatedPayments;
     filters: {
-        status?: string | null;
-        student_id?: number | null;
-        academic_year_id?: number | null;
-        date_from?: string | null;
-        date_to?: string | null;
+        search?: string;
+        date_from?: string;
+        date_to?: string;
+        purpose?: string;
+        cashier_id?: string;
+        payment_method?: string;
     };
-    students: StudentOption[];
-    academicYears: AcademicYearOption[];
-    statuses: string[];
+    purposes: string[];
+    cashiers: CashierOption[];
+    paymentMethods: PaymentMethodOption[];
+    auth: {
+        user?: {
+            can?: {
+                createPayments?: boolean;
+            };
+        };
+    };
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -72,14 +86,20 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function PaymentsIndex() {
-    const { payments, filters, students, academicYears, statuses } = usePage<PageProps>().props;
+const paymentMethodLabel = (method: string): string => {
+    const formatted = method.replace(/_/g, ' ');
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+};
 
-    const [status, setStatus] = useState<string>(filters.status ?? '');
-    const [studentId, setStudentId] = useState<string>(filters.student_id ? String(filters.student_id) : '');
-    const [academicYearId, setAcademicYearId] = useState<string>(filters.academic_year_id ? String(filters.academic_year_id) : '');
+export default function PaymentsIndex() {
+    const { payments, filters, purposes, cashiers, paymentMethods, auth } = usePage<PageProps>().props;
+
+    const [search, setSearch] = useState<string>(filters.search ?? '');
     const [dateFrom, setDateFrom] = useState<string>(filters.date_from ?? '');
     const [dateTo, setDateTo] = useState<string>(filters.date_to ?? '');
+    const [purpose, setPurpose] = useState<string>(filters.purpose ?? '');
+    const [cashierId, setCashierId] = useState<string>(filters.cashier_id ?? '');
+    const [paymentMethod, setPaymentMethod] = useState<string>(filters.payment_method ?? '');
 
     const isFirstRender = useRef(true);
 
@@ -93,11 +113,12 @@ export default function PaymentsIndex() {
             router.get(
                 indexPayments({
                     query: {
-                        status: status || undefined,
-                        student_id: studentId || undefined,
-                        academic_year_id: academicYearId || undefined,
+                        search: search || undefined,
                         date_from: dateFrom || undefined,
                         date_to: dateTo || undefined,
+                        purpose: purpose || undefined,
+                        cashier_id: cashierId || undefined,
+                        payment_method: paymentMethod || undefined,
                     },
                 }).url,
                 {},
@@ -110,16 +131,25 @@ export default function PaymentsIndex() {
         }, 250);
 
         return () => clearTimeout(timeout);
-    }, [status, studentId, academicYearId, dateFrom, dateTo]);
+    }, [search, dateFrom, dateTo, purpose, cashierId, paymentMethod]);
 
     const clearFilters = () => {
-        setStatus('');
-        setStudentId('');
-        setAcademicYearId('');
+        setSearch('');
         setDateFrom('');
         setDateTo('');
+        setPurpose('');
+        setCashierId('');
+        setPaymentMethod('');
         router.get(indexPayments().url, {}, { preserveScroll: true, replace: true });
     };
+
+    const pageTotalAmount = useMemo(() => payments.data.reduce((sum, payment) => sum + payment.amount, 0), [payments.data]);
+
+    const printedCount = useMemo(() => payments.data.filter((payment) => payment.is_printed).length, [payments.data]);
+
+    const pendingPrintCount = payments.data.length - printedCount;
+
+    const canCreatePayments = auth?.user?.can?.createPayments ?? false;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -129,27 +159,67 @@ export default function PaymentsIndex() {
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
                         <h1 className="text-2xl font-semibold">Payments</h1>
-                        <p className="text-sm text-muted-foreground">Review all recorded transactions and track outstanding balances.</p>
+                        <p className="text-sm text-muted-foreground">Track receipts, filter transactions, and verify print status in seconds.</p>
                     </div>
 
-                    <Button asChild>
-                        <Link href={createPayment().url}>Record payment</Link>
-                    </Button>
+                    {canCreatePayments && (
+                        <Button asChild>
+                            <Link href={createPayment().url}>Record payment</Link>
+                        </Button>
+                    )}
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <Card className="border-border/60 bg-muted/40">
+                        <CardHeader>
+                            <CardTitle>Page total</CardTitle>
+                            <CardDescription>Sum of payments shown on this page</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pb-6 text-2xl font-semibold text-foreground">
+                            ₱{pageTotalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-border/60">
+                        <CardHeader>
+                            <CardTitle>Printed receipts</CardTitle>
+                            <CardDescription>Marked as printed on this page</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pb-6 text-2xl font-semibold text-foreground">{printedCount}</CardContent>
+                    </Card>
+
+                    <Card className="border-border/60">
+                        <CardHeader>
+                            <CardTitle>Pending prints</CardTitle>
+                            <CardDescription>Receipts awaiting print</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pb-6 text-2xl font-semibold text-foreground">{pendingPrintCount}</CardContent>
+                    </Card>
                 </div>
 
                 <div className="grid gap-4 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                    <div className="grid gap-3 md:grid-cols-5">
+                    <div className="grid gap-3 md:grid-cols-6">
+                        <div className="flex flex-col gap-2 md:col-span-2">
+                            <Label htmlFor="search">Search</Label>
+                            <Input
+                                id="search"
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                                placeholder="Search by student or receipt number"
+                            />
+                        </div>
+
                         <div className="flex flex-col gap-2">
-                            <Label>Status</Label>
-                            <Select value={status} onValueChange={setStatus}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="All statuses" />
+                            <Label htmlFor="purpose">Purpose</Label>
+                            <Select value={purpose} onValueChange={setPurpose}>
+                                <SelectTrigger id="purpose">
+                                    <SelectValue placeholder="All purposes" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All statuses</SelectItem>
-                                    {statuses.map((item) => (
+                                    <SelectItem value="">All purposes</SelectItem>
+                                    {purposes.filter(Boolean).map((item) => (
                                         <SelectItem key={item} value={item}>
-                                            {item.charAt(0).toUpperCase() + item.slice(1)}
+                                            {item}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -157,16 +227,16 @@ export default function PaymentsIndex() {
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <Label>Student</Label>
-                            <Select value={studentId} onValueChange={setStudentId}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="All students" />
+                            <Label htmlFor="cashier">Cashier</Label>
+                            <Select value={cashierId} onValueChange={setCashierId}>
+                                <SelectTrigger id="cashier">
+                                    <SelectValue placeholder="All cashiers" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All students</SelectItem>
-                                    {students.map((student) => (
-                                        <SelectItem key={student.id} value={String(student.id)}>
-                                            {student.full_name}
+                                    <SelectItem value="">All cashiers</SelectItem>
+                                    {cashiers.map((cashier) => (
+                                        <SelectItem key={cashier.id} value={String(cashier.id)}>
+                                            {cashier.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -174,16 +244,16 @@ export default function PaymentsIndex() {
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <Label>Academic year</Label>
-                            <Select value={academicYearId} onValueChange={setAcademicYearId}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="All years" />
+                            <Label htmlFor="method">Payment method</Label>
+                            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                                <SelectTrigger id="method">
+                                    <SelectValue placeholder="All methods" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All years</SelectItem>
-                                    {academicYears.map((year) => (
-                                        <SelectItem key={year.id} value={String(year.id)}>
-                                            {year.name}
+                                    <SelectItem value="">All methods</SelectItem>
+                                    {paymentMethods.map((method) => (
+                                        <SelectItem key={method.value} value={method.value}>
+                                            {method.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -201,7 +271,7 @@ export default function PaymentsIndex() {
                         </div>
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-3">
                         <Button variant="outline" onClick={clearFilters}>
                             Reset filters
                         </Button>
@@ -212,45 +282,67 @@ export default function PaymentsIndex() {
                     <table className="min-w-full divide-y divide-border/70 text-left text-sm">
                         <thead className="bg-muted/40 text-muted-foreground">
                             <tr>
-                                <th className="px-4 py-3 font-medium">Date</th>
+                                <th className="px-4 py-3 font-medium">Receipt</th>
                                 <th className="px-4 py-3 font-medium">Student</th>
-                                <th className="px-4 py-3 font-medium">Grade &amp; Section</th>
-                                <th className="px-4 py-3 font-medium">Status</th>
+                                <th className="px-4 py-3 font-medium">Purpose</th>
                                 <th className="px-4 py-3 font-medium">Cashier</th>
+                                <th className="px-4 py-3 font-medium">Date</th>
                                 <th className="px-4 py-3 text-right font-medium">Amount</th>
+                                <th className="px-4 py-3" />
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/60">
                             {payments.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                                        No payments found. Adjust the filters or record a new payment.
+                                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                                        No payments found. Try adjusting your filters or record a new payment.
                                     </td>
                                 </tr>
                             )}
 
                             {payments.data.map((payment) => (
                                 <tr key={payment.id} className="hover:bg-muted/40">
-                                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                                        {payment.paid_at ? formatDateTime(payment.paid_at) : '—'}
+                                    <td className="px-4 py-3">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="font-medium text-foreground">{payment.receipt_number}</span>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="secondary" className="capitalize">
+                                                    {paymentMethodLabel(payment.payment_method)}
+                                                </Badge>
+                                                <Badge variant={payment.is_printed ? 'default' : 'outline'}>
+                                                    {payment.is_printed ? 'Printed' : 'Pending'}
+                                                </Badge>
+                                            </div>
+                                        </div>
                                     </td>
+
                                     <td className="px-4 py-3">
                                         <div className="flex flex-col">
                                             <span className="font-medium text-foreground">{payment.student.full_name}</span>
                                             <span className="text-xs text-muted-foreground">{payment.student.student_number}</span>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                                        {payment.enrollment?.grade_level?.name ?? '—'}
-                                        {payment.enrollment?.section ? ` · Section ${payment.enrollment.section.name}` : ''}
-                                    </td>
+
                                     <td className="px-4 py-3">
-                                        <Badge variant={payment.status === 'paid' ? 'default' : 'secondary'} className="capitalize">
-                                            {payment.status}
-                                        </Badge>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-sm font-medium text-foreground">{payment.payment_purpose}</span>
+                                            {payment.notes && <span className="text-xs text-muted-foreground">{payment.notes}</span>}
+                                        </div>
                                     </td>
+
                                     <td className="px-4 py-3 text-sm text-muted-foreground">{payment.cashier?.name ?? '—'}</td>
-                                    <td className="px-4 py-3 text-right font-medium">{formatCurrency(payment.amount, payment.currency)}</td>
+
+                                    <td className="px-4 py-3 text-sm text-muted-foreground">{formatDate(payment.payment_date)}</td>
+
+                                    <td className="px-4 py-3 text-right font-semibold text-foreground">
+                                        ₱{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </td>
+
+                                    <td className="px-4 py-3 text-right">
+                                        <Button variant="outline" size="sm" asChild>
+                                            <Link href={showPayment({ payment: payment.id }).url}>View</Link>
+                                        </Button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -271,20 +363,9 @@ export default function PaymentsIndex() {
     );
 }
 
-function formatDateTime(isoDate: string) {
-    return new Intl.DateTimeFormat('en-PH', {
+const formatDate = (isoDate: string) =>
+    new Intl.DateTimeFormat('en-PH', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
     }).format(new Date(isoDate));
-}
-
-function formatCurrency(amount: number, currency: string) {
-    return new Intl.NumberFormat('en-PH', {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 2,
-    }).format(amount);
-}

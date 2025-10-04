@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { destroy as destroyStudent, edit as editStudent, index as indexStudents } from '@/routes/students';
+import { destroy as destroyStudent, edit as editStudent, index as indexStudents, show as showStudent } from '@/routes/students';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
@@ -47,6 +47,14 @@ interface Payment {
 interface PageProps extends Record<string, unknown> {
     student: Student;
     paymentHistory: Payment[];
+    auth: {
+        user?: {
+            can?: {
+                editStudents?: boolean;
+                deleteStudents?: boolean;
+            };
+        };
+    };
 }
 
 const getPaymentStatusColor = (status: string): string => {
@@ -88,7 +96,7 @@ export default function ShowStudent() {
         },
         {
             title: student.student_number,
-            href: '',
+            href: showStudent({ student: student.id }).url,
         },
     ];
 
