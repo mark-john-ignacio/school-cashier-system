@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { destroy as destroyStudent, edit as editStudent, index as indexStudents, show as showStudent } from '@/routes/students';
 import { type BreadcrumbItem } from '@/types';
@@ -116,209 +117,217 @@ export default function ShowStudent() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={student.full_name} />
 
-            <div className="flex flex-col gap-6">
-                {/* Header */}
-                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-semibold">{student.full_name}</h1>
-                            <Badge className={getStatusColor(student.status)}>
-                                {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
-                            </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">Student Number: {student.student_number}</p>
-                    </div>
-
-                    <div className="flex gap-3">
-                        {canEdit && (
-                            <Button variant="outline" asChild>
-                                <Link href={editStudent({ student: student.id }).url}>Edit Student</Link>
-                            </Button>
-                        )}
-                        {canDelete && student.status === 'active' && (
-                            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-                                {isDeleting ? 'Deactivating...' : 'Deactivate'}
-                            </Button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Payment Summary Cards */}
-                <div className="grid gap-4 md:grid-cols-3">
-                    <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <p className="text-sm text-muted-foreground">Expected Fees</p>
-                        <p className="text-2xl font-semibold">₱{student.expected_fees.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    </div>
-
-                    <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <p className="text-sm text-muted-foreground">Total Paid</p>
-                        <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
-                            ₱{student.total_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </p>
-                    </div>
-
-                    <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Balance</p>
-                            <Badge className={getPaymentStatusColor(student.payment_status)}>
-                                {student.payment_status.charAt(0).toUpperCase() + student.payment_status.slice(1)}
-                            </Badge>
-                        </div>
-                        <p
-                            className={`text-2xl font-semibold ${student.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}
-                        >
-                            ₱{Math.abs(student.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Student Information */}
-                <div className="grid gap-6 md:grid-cols-2">
-                    {/* Personal Information */}
-                    <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
-                        <h2 className="text-lg font-semibold">Personal Information</h2>
-
-                        <div className="grid gap-3">
-                            <div className="flex items-start gap-3">
-                                <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                                <div className="flex flex-col gap-1">
-                                    <p className="text-sm text-muted-foreground">Full Name</p>
-                                    <p className="font-medium">{student.full_name}</p>
+            <div className="p-4 md:p-8">
+                <Card>
+                    <CardHeader>
+                        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-3">
+                                    <CardTitle>{student.full_name}</CardTitle>
+                                    <Badge className={getStatusColor(student.status)}>
+                                        {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                                    </Badge>
                                 </div>
+                                <CardDescription>Student Number: {student.student_number}</CardDescription>
                             </div>
 
-                            <div className="flex items-start gap-3">
-                                <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                                <div className="flex flex-col gap-1">
-                                    <p className="text-sm text-muted-foreground">Grade & Section</p>
-                                    <p className="font-medium">
-                                        {student.grade_level} - Section {student.section}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {student.contact_number && (
-                                <div className="flex items-start gap-3">
-                                    <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-sm text-muted-foreground">Contact Number</p>
-                                        <p className="font-medium">{student.contact_number}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {student.email && (
-                                <div className="flex items-start gap-3">
-                                    <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                                    <div className="flex flex-col gap-1">
-                                        <p className="text-sm text-muted-foreground">Email</p>
-                                        <p className="font-medium">{student.email}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex items-start gap-3">
-                                <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                                <div className="flex flex-col gap-1">
-                                    <p className="text-sm text-muted-foreground">Enrolled Since</p>
-                                    <p className="font-medium">{format(new Date(student.created_at), 'MMMM d, yyyy')}</p>
-                                </div>
+                            <div className="flex gap-3">
+                                {canEdit && (
+                                    <Button variant="outline" asChild>
+                                        <Link href={editStudent({ student: student.id }).url}>Edit Student</Link>
+                                    </Button>
+                                )}
+                                {canDelete && student.status === 'active' && (
+                                    <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                                        {isDeleting ? 'Deactivating...' : 'Deactivate'}
+                                    </Button>
+                                )}
                             </div>
                         </div>
-                    </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {/* Payment Summary Cards */}
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+                                <p className="text-sm text-muted-foreground">Expected Fees</p>
+                                <p className="text-2xl font-semibold">
+                                    ₱{student.expected_fees.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </p>
+                            </div>
 
-                    {/* Parent/Guardian Information */}
-                    <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
-                        <h2 className="text-lg font-semibold">Parent/Guardian Information</h2>
+                            <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+                                <p className="text-sm text-muted-foreground">Total Paid</p>
+                                <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
+                                    ₱{student.total_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </p>
+                            </div>
 
-                        <div className="grid gap-3">
-                            {student.parent_name ? (
-                                <>
+                            <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm text-muted-foreground">Balance</p>
+                                    <Badge className={getPaymentStatusColor(student.payment_status)}>
+                                        {student.payment_status.charAt(0).toUpperCase() + student.payment_status.slice(1)}
+                                    </Badge>
+                                </div>
+                                <p
+                                    className={`text-2xl font-semibold ${student.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}
+                                >
+                                    ₱{Math.abs(student.balance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Student Information */}
+                        <div className="grid gap-6 md:grid-cols-2">
+                            {/* Personal Information */}
+                            <div className="space-y-4">
+                                <h2 className="text-lg font-semibold">Personal Information</h2>
+
+                                <div className="grid gap-3">
                                     <div className="flex items-start gap-3">
                                         <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                         <div className="flex flex-col gap-1">
-                                            <p className="text-sm text-muted-foreground">Name</p>
-                                            <p className="font-medium">{student.parent_name}</p>
+                                            <p className="text-sm text-muted-foreground">Full Name</p>
+                                            <p className="font-medium">{student.full_name}</p>
                                         </div>
                                     </div>
 
-                                    {student.parent_contact && (
+                                    <div className="flex items-start gap-3">
+                                        <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                        <div className="flex flex-col gap-1">
+                                            <p className="text-sm text-muted-foreground">Grade & Section</p>
+                                            <p className="font-medium">
+                                                {student.grade_level} - Section {student.section}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {student.contact_number && (
                                         <div className="flex items-start gap-3">
                                             <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                             <div className="flex flex-col gap-1">
                                                 <p className="text-sm text-muted-foreground">Contact Number</p>
-                                                <p className="font-medium">{student.parent_contact}</p>
+                                                <p className="font-medium">{student.contact_number}</p>
                                             </div>
                                         </div>
                                     )}
 
-                                    {student.parent_email && (
+                                    {student.email && (
                                         <div className="flex items-start gap-3">
                                             <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
                                             <div className="flex flex-col gap-1">
                                                 <p className="text-sm text-muted-foreground">Email</p>
-                                                <p className="font-medium">{student.parent_email}</p>
+                                                <p className="font-medium">{student.email}</p>
                                             </div>
                                         </div>
                                     )}
-                                </>
+
+                                    <div className="flex items-start gap-3">
+                                        <Calendar className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                        <div className="flex flex-col gap-1">
+                                            <p className="text-sm text-muted-foreground">Enrolled Since</p>
+                                            <p className="font-medium">{format(new Date(student.created_at), 'MMMM d, yyyy')}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Parent/Guardian Information */}
+                            <div className="space-y-4">
+                                <h2 className="text-lg font-semibold">Parent/Guardian Information</h2>
+
+                                <div className="grid gap-3">
+                                    {student.parent_name ? (
+                                        <>
+                                            <div className="flex items-start gap-3">
+                                                <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                                <div className="flex flex-col gap-1">
+                                                    <p className="text-sm text-muted-foreground">Name</p>
+                                                    <p className="font-medium">{student.parent_name}</p>
+                                                </div>
+                                            </div>
+
+                                            {student.parent_contact && (
+                                                <div className="flex items-start gap-3">
+                                                    <Phone className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                                    <div className="flex flex-col gap-1">
+                                                        <p className="text-sm text-muted-foreground">Contact Number</p>
+                                                        <p className="font-medium">{student.parent_contact}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {student.parent_email && (
+                                                <div className="flex items-start gap-3">
+                                                    <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                                    <div className="flex flex-col gap-1">
+                                                        <p className="text-sm text-muted-foreground">Email</p>
+                                                        <p className="font-medium">{student.parent_email}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">No parent/guardian information available.</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Notes */}
+                        {student.notes && (
+                            <div className="space-y-4">
+                                <h2 className="text-lg font-semibold">Additional Notes</h2>
+                                <p className="text-sm text-muted-foreground">{student.notes}</p>
+                            </div>
+                        )}
+
+                        {/* Payment History */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-semibold">Payment History</h2>
+                                <p className="text-sm text-muted-foreground">{paymentHistory.length} transactions</p>
+                            </div>
+
+                            {paymentHistory.length === 0 ? (
+                                <p className="py-8 text-center text-sm text-muted-foreground">No payment history available.</p>
                             ) : (
-                                <p className="text-sm text-muted-foreground">No parent/guardian information available.</p>
+                                <div className="overflow-hidden rounded-lg border border-border/60">
+                                    <table className="min-w-full divide-y divide-border/70 text-left text-sm">
+                                        <thead className="bg-muted/40 text-muted-foreground">
+                                            <tr>
+                                                <th className="px-4 py-3 font-medium">Date</th>
+                                                <th className="px-4 py-3 font-medium">Receipt</th>
+                                                <th className="px-4 py-3 font-medium">Purpose</th>
+                                                <th className="px-4 py-3 font-medium">Method</th>
+                                                <th className="px-4 py-3 font-medium">Cashier</th>
+                                                <th className="px-4 py-3 text-right font-medium">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border/60">
+                                            {paymentHistory.map((payment) => (
+                                                <tr key={payment.id} className="hover:bg-muted/40">
+                                                    <td className="px-4 py-3">{format(new Date(payment.payment_date), 'MMM d, yyyy')}</td>
+                                                    <td className="px-4 py-3">
+                                                        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                                                            {payment.receipt_number}
+                                                        </code>
+                                                    </td>
+                                                    <td className="px-4 py-3">{payment.payment_purpose}</td>
+                                                    <td className="px-4 py-3 capitalize">{payment.payment_method}</td>
+                                                    <td className="px-4 py-3 text-muted-foreground">{payment.cashier_name}</td>
+                                                    <td className="px-4 py-3 text-right font-medium">
+                                                        ₱{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             )}
                         </div>
-                    </div>
-                </div>
-
-                {/* Notes */}
-                {student.notes && (
-                    <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
-                        <h2 className="text-lg font-semibold">Additional Notes</h2>
-                        <p className="text-sm text-muted-foreground">{student.notes}</p>
-                    </div>
-                )}
-
-                {/* Payment History */}
-                <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-semibold">Payment History</h2>
-                        <p className="text-sm text-muted-foreground">{paymentHistory.length} transactions</p>
-                    </div>
-
-                    {paymentHistory.length === 0 ? (
-                        <p className="py-8 text-center text-sm text-muted-foreground">No payment history available.</p>
-                    ) : (
-                        <div className="overflow-hidden rounded-lg border border-border/60">
-                            <table className="min-w-full divide-y divide-border/70 text-left text-sm">
-                                <thead className="bg-muted/40 text-muted-foreground">
-                                    <tr>
-                                        <th className="px-4 py-3 font-medium">Date</th>
-                                        <th className="px-4 py-3 font-medium">Receipt</th>
-                                        <th className="px-4 py-3 font-medium">Purpose</th>
-                                        <th className="px-4 py-3 font-medium">Method</th>
-                                        <th className="px-4 py-3 font-medium">Cashier</th>
-                                        <th className="px-4 py-3 text-right font-medium">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border/60">
-                                    {paymentHistory.map((payment) => (
-                                        <tr key={payment.id} className="hover:bg-muted/40">
-                                            <td className="px-4 py-3">{format(new Date(payment.payment_date), 'MMM d, yyyy')}</td>
-                                            <td className="px-4 py-3">
-                                                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{payment.receipt_number}</code>
-                                            </td>
-                                            <td className="px-4 py-3">{payment.payment_purpose}</td>
-                                            <td className="px-4 py-3 capitalize">{payment.payment_method}</td>
-                                            <td className="px-4 py-3 text-muted-foreground">{payment.cashier_name}</td>
-                                            <td className="px-4 py-3 text-right font-medium">
-                                                ₱{payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );
