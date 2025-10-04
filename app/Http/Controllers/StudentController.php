@@ -10,14 +10,6 @@ use Inertia\Inertia;
 
 class StudentController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('permission:view students')->only(['index', 'show']);
-        $this->middleware('permission:create students')->only(['create', 'store']);
-        $this->middleware('permission:edit students')->only(['edit', 'update']);
-        $this->middleware('permission:delete students')->only(['destroy']);
-    }
-
     /**
      * Display a listing of the resource.
      */

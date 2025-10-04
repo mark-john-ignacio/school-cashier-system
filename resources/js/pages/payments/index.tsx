@@ -211,12 +211,11 @@ export default function PaymentsIndex() {
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="purpose">Purpose</Label>
-                            <Select value={purpose} onValueChange={setPurpose}>
+                            <Select value={purpose || undefined} onValueChange={(value) => setPurpose(value)}>
                                 <SelectTrigger id="purpose">
                                     <SelectValue placeholder="All purposes" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All purposes</SelectItem>
                                     {purposes.filter(Boolean).map((item) => (
                                         <SelectItem key={item} value={item}>
                                             {item}
@@ -228,12 +227,11 @@ export default function PaymentsIndex() {
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="cashier">Cashier</Label>
-                            <Select value={cashierId} onValueChange={setCashierId}>
+                            <Select value={cashierId || undefined} onValueChange={(value) => setCashierId(value)}>
                                 <SelectTrigger id="cashier">
                                     <SelectValue placeholder="All cashiers" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All cashiers</SelectItem>
                                     {cashiers.map((cashier) => (
                                         <SelectItem key={cashier.id} value={String(cashier.id)}>
                                             {cashier.name}
@@ -245,12 +243,11 @@ export default function PaymentsIndex() {
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="method">Payment method</Label>
-                            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                            <Select value={paymentMethod || undefined} onValueChange={(value) => setPaymentMethod(value)}>
                                 <SelectTrigger id="method">
                                     <SelectValue placeholder="All methods" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All methods</SelectItem>
                                     {paymentMethods.map((method) => (
                                         <SelectItem key={method.value} value={method.value}>
                                             {method.label}

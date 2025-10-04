@@ -16,13 +16,6 @@ class PaymentController extends Controller
         ['value' => 'online', 'label' => 'Online'],
     ];
 
-    public function __construct()
-    {
-        $this->middleware('permission:view payments')->only(['index', 'show']);
-        $this->middleware('permission:create payments')->only(['create', 'store']);
-        $this->middleware('permission:void payments')->only(['destroy']);
-    }
-
     /**
      * Display a listing of the resource.
      */

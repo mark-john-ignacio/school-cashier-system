@@ -15,11 +15,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Student Management Routes
-    Route::resource('students', StudentController::class);
+    Route::resource('students', StudentController::class)->middleware('permission:view students');
 
     // Payment Processing Routes
-    Route::resource('payments', PaymentController::class)->except(['edit', 'update']);
-    Route::post('payments/{payment}/print', [PaymentController::class, 'print'])->name('payments.print');
+    Route::resource('payments', PaymentController::class)
+        ->except(['edit', 'update'])
+        ->middleware('permission:view payments');
+    Route::post('payments/{payment}/print', [PaymentController::class, 'print'])
+        ->name('payments.print')
+        ->middleware('permission:print receipts');
 });
 
 require __DIR__.'/settings.php';

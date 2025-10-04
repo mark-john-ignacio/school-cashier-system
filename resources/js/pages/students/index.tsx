@@ -170,12 +170,11 @@ export default function StudentsIndex() {
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="grade-level-filter">Grade level</Label>
-                            <Select value={gradeLevel} onValueChange={setGradeLevel}>
+                            <Select value={gradeLevel || undefined} onValueChange={(value) => setGradeLevel(value)}>
                                 <SelectTrigger id="grade-level-filter">
                                     <SelectValue placeholder="All grades" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All grades</SelectItem>
                                     {gradeLevels.map((level) => (
                                         <SelectItem key={level} value={level}>
                                             {level}
@@ -187,12 +186,11 @@ export default function StudentsIndex() {
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="section-filter">Section</Label>
-                            <Select value={section} onValueChange={setSection}>
+                            <Select value={section || undefined} onValueChange={(value) => setSection(value)}>
                                 <SelectTrigger id="section-filter">
                                     <SelectValue placeholder="All sections" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All sections</SelectItem>
                                     {sections.map((sec) => (
                                         <SelectItem key={sec} value={sec}>
                                             Section {sec}
@@ -204,12 +202,11 @@ export default function StudentsIndex() {
 
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="status-filter">Status</Label>
-                            <Select value={status} onValueChange={setStatus}>
+                            <Select value={status || undefined} onValueChange={(value) => setStatus(value)}>
                                 <SelectTrigger id="status-filter">
                                     <SelectValue placeholder="All statuses" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All statuses</SelectItem>
                                     <SelectItem value="active">Active</SelectItem>
                                     <SelectItem value="inactive">Inactive</SelectItem>
                                     <SelectItem value="graduated">Graduated</SelectItem>
