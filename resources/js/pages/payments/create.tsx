@@ -17,8 +17,8 @@ interface StudentSummary {
     id: number;
     student_number: string;
     full_name: string;
-    grade_level: string;
-    section: string;
+    grade_level: string | null;
+    section: string | null;
     balance: number;
     total_paid?: number;
     expected_fees?: number;
@@ -175,13 +175,13 @@ export default function CreatePayment() {
                                                         <p className="text-base font-semibold text-foreground">{selectedStudent.full_name}</p>
                                                         <p className="text-sm text-muted-foreground">{selectedStudent.student_number}</p>
                                                     </div>
-                                                    <Badge variant="secondary">{selectedStudent.grade_level}</Badge>
+                                                    <Badge variant="secondary">{selectedStudent.grade_level ?? 'Unassigned'}</Badge>
                                                 </div>
 
                                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                                     <div>
                                                         <span className="text-muted-foreground">Section</span>
-                                                        <p className="font-medium text-foreground">{selectedStudent.section}</p>
+                                                        <p className="font-medium text-foreground">{selectedStudent.section ?? 'Unassigned'}</p>
                                                     </div>
                                                     <div>
                                                         <span className="text-muted-foreground">Balance</span>
@@ -247,10 +247,10 @@ export default function CreatePayment() {
                                                             <p className="text-sm font-medium text-foreground">{studentOption.full_name}</p>
                                                             <p className="text-xs text-muted-foreground">{studentOption.student_number}</p>
                                                         </div>
-                                                        <Badge variant="outline">{studentOption.grade_level}</Badge>
+                                                        <Badge variant="outline">{studentOption.grade_level ?? 'Unassigned'}</Badge>
                                                     </div>
                                                     <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                                                        <span>Section {studentOption.section}</span>
+                                                        <span>Section {studentOption.section ?? '—'}</span>
                                                         <span>
                                                             Balance: ₱{studentOption.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                         </span>

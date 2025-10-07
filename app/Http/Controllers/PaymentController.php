@@ -147,14 +147,16 @@ class PaymentController extends Controller
         // If student_id is provided, pre-select the student
         $student = null;
         if ($request->filled('student_id')) {
-            $student = Student::find($request->student_id);
+            $student = Student::query()
+                ->with(['gradeLevel:id,name', 'section:id,name'])
+                ->find($request->student_id);
             if ($student) {
                 $student = [
                     'id' => $student->id,
                     'student_number' => $student->student_number,
                     'full_name' => $student->full_name,
-                    'grade_level' => $student->grade_level,
-                    'section' => $student->section,
+                    'grade_level' => $student->grade_level_name,
+                    'section' => $student->section_name,
                     'balance' => $student->balance,
                     'total_paid' => $student->total_paid,
                     'expected_fees' => $student->expected_fees,
@@ -163,7 +165,8 @@ class PaymentController extends Controller
         }
 
         $studentsQuery = Student::query()
-            ->select('id', 'student_number', 'first_name', 'middle_name', 'last_name', 'grade_level', 'section')
+            ->select('id', 'student_number', 'first_name', 'middle_name', 'last_name', 'grade_level_id', 'section_id')
+            ->with(['gradeLevel:id,name', 'section:id,name'])
             ->orderBy('last_name');
 
         if ($request->filled('search')) {
@@ -179,8 +182,8 @@ class PaymentController extends Controller
                 'id' => $studentOption->id,
                 'student_number' => $studentOption->student_number,
                 'full_name' => $studentOption->full_name,
-                'grade_level' => $studentOption->grade_level,
-                'section' => $studentOption->section,
+                'grade_level' => $studentOption->grade_level_name,
+                'section' => $studentOption->section_name,
                 'balance' => $studentOption->balance,
             ])
             ->all();
@@ -234,7 +237,7 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment)
     {
-        $payment->load(['student', 'user']);
+    $payment->load(['student.gradeLevel', 'student.section', 'user']);
 
         return Inertia::render('payments/show', [
             'payment' => [
@@ -249,8 +252,8 @@ class PaymentController extends Controller
                     'id' => $payment->student->id,
                     'student_number' => $payment->student->student_number,
                     'full_name' => $payment->student->full_name,
-                    'grade_level' => $payment->student->grade_level,
-                    'section' => $payment->student->section,
+                    'grade_level' => $payment->student->grade_level_name ?? 'Unassigned',
+                    'section' => $payment->student->section_name ?? 'Unassigned',
                 ],
                 'cashier' => [
                     'id' => $payment->user->id,

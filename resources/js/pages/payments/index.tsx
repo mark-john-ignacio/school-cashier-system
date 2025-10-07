@@ -222,15 +222,24 @@ export default function PaymentsIndex() {
                                     </Select>
                                 </div>
 
-                                <div className="flex flex-col gap-2">
-                                    <Label htmlFor="date_from">Date from</Label>
-                                    <Input id="date_from" type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <Label htmlFor="date_to">Date to</Label>
-                                    <Input id="date_to" type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
-                                </div>
+                                <fieldset className="flex flex-col gap-3 md:col-span-2">
+                                    <legend className="text-sm font-medium text-foreground">Date range</legend>
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        <div className="flex flex-col gap-2">
+                                            <Label htmlFor="date_from">From</Label>
+                                            <Input
+                                                id="date_from"
+                                                type="date"
+                                                value={dateFrom}
+                                                onChange={(event) => setDateFrom(event.target.value)}
+                                            />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <Label htmlFor="date_to">To</Label>
+                                            <Input id="date_to" type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+                                        </div>
+                                    </div>
+                                </fieldset>
                             </div>
 
                             <div className="mt-4 flex justify-end">
