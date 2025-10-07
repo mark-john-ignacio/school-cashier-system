@@ -32,14 +32,20 @@ class StudentController extends Controller
             $query->search($request->search);
         }
 
+        $gradeLevelFilterInput = $request->input('grade_level');
+        $resolvedGradeLevel = $this->resolveGradeLevel($gradeLevelFilterInput);
+
         // Filter by grade level
         if ($request->filled('grade_level')) {
-            $query->gradeLevel($request->grade_level);
+            $query->gradeLevel($gradeLevelFilterInput);
         }
+
+        $sectionFilterInput = $request->input('section');
+        $resolvedSection = $this->resolveSection($sectionFilterInput, $resolvedGradeLevel?->id);
 
         // Filter by section
         if ($request->filled('section')) {
-            $query->section($request->section);
+            $query->section($sectionFilterInput);
         }
 
         // Filter by status
@@ -52,7 +58,7 @@ class StudentController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
-    $students = $query->paginate($perPage)->withQueryString();
+        $students = $query->paginate($perPage)->withQueryString();
 
         // Add computed attributes
         $students->getCollection()->transform(function ($student) {
@@ -75,28 +81,40 @@ class StudentController extends Controller
         });
 
 
-        // Get grade levels for filter
         $gradeLevels = GradeLevel::query()
+            ->with(['sections' => function ($query) {
+                $query->orderBy('display_order')->orderBy('name');
+            }])
             ->orderBy('display_order')
             ->orderBy('name')
-            ->pluck('name');
+            ->get();
 
-        // Get sections grouped by grade level for filter
-        $sectionsByGrade = GradeLevel::with(['sections' => function ($q) {
-            $q->orderBy('display_order')->orderBy('name');
-        }])
-        ->orderBy('display_order')
-        ->orderBy('name')
-        ->get()
-        ->mapWithKeys(function ($grade) {
-            return [$grade->name => $grade->sections->pluck('name')->all()];
-        })
-        ->toArray();
+        $gradeLevelOptions = $gradeLevels
+            ->map(fn ($grade) => [
+                'id' => $grade->id,
+                'name' => $grade->name,
+            ])
+            ->all();
+
+        $sectionsByGrade = $gradeLevels
+            ->mapWithKeys(fn ($grade) => [
+                (string) $grade->id => $grade->sections->map(fn ($section) => [
+                    'id' => $section->id,
+                    'name' => $section->name,
+                ])->all(),
+            ])
+            ->toArray();
 
         return Inertia::render('students/index', [
             'students' => $students,
-            'filters' => $request->only(['search', 'grade_level', 'section', 'status', 'per_page']),
-            'gradeLevels' => $gradeLevels,
+            'filters' => [
+                'search' => $request->input('search'),
+                'grade_level' => $resolvedGradeLevel?->id ? (string) $resolvedGradeLevel->id : '',
+                'section' => $resolvedSection?->id ? (string) $resolvedSection->id : '',
+                'status' => $request->input('status'),
+                'per_page' => (string) $perPage,
+            ],
+            'gradeLevels' => $gradeLevelOptions,
             'sectionsByGrade' => $sectionsByGrade,
             'perPageOptions' => $perPageOptions,
             'perPage' => $perPage,
@@ -137,36 +155,14 @@ class StudentController extends Controller
         $data = $request->validated();
 
         // Resolve grade level to id
-        $gradeInput = $data['grade_level'] ?? null;
-        $grade = null;
-        if ($gradeInput !== null) {
-            if (is_numeric($gradeInput)) {
-                $grade = GradeLevel::find((int) $gradeInput);
-            } else {
-                $grade = GradeLevel::where('name', $gradeInput)
-                    ->orWhere('slug', $gradeInput)
-                    ->first();
-            }
-        }
+        $grade = $this->resolveGradeLevel($data['grade_level'] ?? null);
 
         if (! $grade) {
             return back()->withErrors(['grade_level' => 'Selected grade level is invalid'])->withInput();
         }
 
         // Resolve section to id (prefer section within grade level)
-        $sectionInput = $data['section'] ?? null;
-        $section = null;
-        if ($sectionInput !== null) {
-            if (is_numeric($sectionInput)) {
-                $section = Section::find((int) $sectionInput);
-            } else {
-                $q = Section::where('name', $sectionInput)->orWhere('slug', $sectionInput);
-                if ($grade) {
-                    $q->where('grade_level_id', $grade->id);
-                }
-                $section = $q->first();
-            }
-        }
+        $section = $this->resolveSection($data['section'] ?? null, $grade->id);
 
         if (! $section) {
             return back()->withErrors(['section' => 'Selected section is invalid'])->withInput();
@@ -189,7 +185,7 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-    $student->load(['payments.user', 'gradeLevel', 'section']);
+        $student->load(['payments.user', 'gradeLevel', 'section']);
 
         $paymentHistory = $student->payments()->orderBy('payment_date', 'desc')->get();
 
@@ -283,36 +279,14 @@ class StudentController extends Controller
         $data = $request->validated();
 
         // Resolve grade level to id
-        $gradeInput = $data['grade_level'] ?? null;
-        $grade = null;
-        if ($gradeInput !== null) {
-            if (is_numeric($gradeInput)) {
-                $grade = GradeLevel::find((int) $gradeInput);
-            } else {
-                $grade = GradeLevel::where('name', $gradeInput)
-                    ->orWhere('slug', $gradeInput)
-                    ->first();
-            }
-        }
+        $grade = $this->resolveGradeLevel($data['grade_level'] ?? null);
 
         if (! $grade) {
             return back()->withErrors(['grade_level' => 'Selected grade level is invalid'])->withInput();
         }
 
         // Resolve section to id (prefer section within grade level)
-        $sectionInput = $data['section'] ?? null;
-        $section = null;
-        if ($sectionInput !== null) {
-            if (is_numeric($sectionInput)) {
-                $section = Section::find((int) $sectionInput);
-            } else {
-                $q = Section::where('name', $sectionInput)->orWhere('slug', $sectionInput);
-                if ($grade) {
-                    $q->where('grade_level_id', $grade->id);
-                }
-                $section = $q->first();
-            }
-        }
+        $section = $this->resolveSection($data['section'] ?? null, $grade->id);
 
         if (! $section) {
             return back()->withErrors(['section' => 'Selected section is invalid'])->withInput();
@@ -340,5 +314,44 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')
             ->with('success', 'Student deactivated successfully.');
+    }
+
+    private function resolveGradeLevel(mixed $input): ?GradeLevel
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        if (is_numeric($input)) {
+            return GradeLevel::find((int) $input);
+        }
+
+        return GradeLevel::query()
+            ->where('slug', $input)
+            ->orWhere('name', $input)
+            ->first();
+    }
+
+    private function resolveSection(mixed $input, ?int $gradeLevelId = null): ?Section
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        if (is_numeric($input)) {
+            return Section::find((int) $input);
+        }
+
+        $query = Section::query()
+            ->where(function ($relation) use ($input) {
+                $relation->where('slug', $input)
+                    ->orWhere('name', $input);
+            });
+
+        if ($gradeLevelId) {
+            $query->where('grade_level_id', $gradeLevelId);
+        }
+
+        return $query->first();
     }
 }

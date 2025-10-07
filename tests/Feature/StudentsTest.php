@@ -3,48 +3,68 @@
 use App\Models\GradeLevel;
 use App\Models\Section;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 uses(RefreshDatabase::class);
 
-it('creates and updates a student with grade and section ids', function () {
-    // Disable middleware so test can hit controller directly
-    $this->withoutMiddleware();
-    // Show exceptions for easier debugging
+it('stores and updates a student via controller routes using numeric ids', function () {
     $this->withoutExceptionHandling();
 
-    // RefreshDatabase trait will handle migrations/transactions for the test
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-    // Create grade level and section
+    $user = User::factory()->create();
+    Permission::firstOrCreate(['name' => 'view students', 'guard_name' => 'web']);
+    $user->givePermissionTo('view students');
+
+    $this->actingAs($user);
+
     $grade = GradeLevel::factory()->create(['name' => 'Grade 1']);
-    $section = Section::factory()->create(['grade_level_id' => $grade->id, 'name' => 'A']);
+    $section = Section::factory()->for($grade, 'gradeLevel')->create(['name' => 'A']);
 
-    // Create student via POST
-    // Use a UUID to avoid collisions with seeded data
-    $studentNumber = 'STU-' . (string) \Illuminate\Support\Str::uuid();
-        // Create student directly (simulate controller-prepared payload)
-        $student = Student::create([
-            'student_number' => $studentNumber,
-            'first_name' => 'Test',
-            'last_name' => 'Student',
-            'grade_level_id' => $grade->id,
-            'section_id' => $section->id,
-            'status' => 'active',
-        ]);
+    $studentNumber = 'STU-' . (string) Str::uuid();
 
-        expect($student)->not->toBeNull();
-        expect($student->grade_level_id)->toBe($grade->id);
-        expect($student->section_id)->toBe($section->id);
+    $response = $this->post(route('students.store'), [
+        'student_number' => $studentNumber,
+        'first_name' => 'Test',
+        'middle_name' => '',
+        'last_name' => 'Student',
+        'grade_level' => $grade->id,
+        'section' => $section->id,
+        'status' => 'active',
+        'notes' => '',
+    ]);
 
-        // Update student to a new section
-        $newGrade = GradeLevel::factory()->create(['name' => 'Grade 2']);
-        $newSection = Section::factory()->create(['grade_level_id' => $newGrade->id, 'name' => 'B']);
+    $student = Student::where('student_number', $studentNumber)->first();
 
-        $student->grade_level_id = $newGrade->id;
-        $student->section_id = $newSection->id;
-        $student->save();
+    expect($student)->not->toBeNull();
+    expect($student->grade_level_id)->toBe($grade->id);
+    expect($student->section_id)->toBe($section->id);
 
-        $student->refresh();
-        expect($student->grade_level_id)->toBe($newGrade->id);
-        expect($student->section_id)->toBe($newSection->id);
+    $response->assertRedirect('/students/' . $student->id);
+
+    $newGrade = GradeLevel::factory()->create(['name' => 'Grade 2']);
+    $newSection = Section::factory()->for($newGrade, 'gradeLevel')->create(['name' => 'B']);
+
+    $updateResponse = $this->put(route('students.update', $student), [
+        'student_number' => $studentNumber,
+        'first_name' => 'Updated',
+        'middle_name' => 'M',
+        'last_name' => 'Student',
+        'grade_level' => $newGrade->id,
+        'section' => $newSection->id,
+        'status' => 'inactive',
+        'notes' => 'Now inactive',
+    ]);
+
+    $updateResponse->assertRedirect('/students/' . $student->id);
+
+    $student->refresh();
+
+    expect($student->grade_level_id)->toBe($newGrade->id);
+    expect($student->section_id)->toBe($newSection->id);
+    expect($student->status)->toBe('inactive');
 });

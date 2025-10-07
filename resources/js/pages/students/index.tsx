@@ -21,17 +21,27 @@ interface PaginatedStudents {
     total?: number;
 }
 
+interface GradeLevelOption {
+    id: number;
+    name: string;
+}
+
+interface SectionOption {
+    id: number;
+    name: string;
+}
+
 interface PageProps extends Record<string, unknown> {
     students: PaginatedStudents;
     filters: {
-        search?: string;
-        grade_level?: string;
-        section?: string;
-        status?: string;
-        per_page?: string;
+        search?: string | null;
+        grade_level?: string | null;
+        section?: string | null;
+        status?: string | null;
+        per_page?: string | null;
     };
-    gradeLevels: string[];
-    sectionsByGrade: Record<string, string[]>;
+    gradeLevels: GradeLevelOption[];
+    sectionsByGrade: Record<string, SectionOption[]>;
     perPageOptions: number[];
     perPage: number;
     defaultPerPage: number;
@@ -72,7 +82,14 @@ export default function StudentsIndex() {
     const isFirstRender = useRef(true);
 
     const allSections = useMemo(() => {
-        return Array.from(new Set(Object.values(sectionsByGrade ?? {}).flat()));
+        const uniqueSections = new Map<string, SectionOption>();
+        Object.values(sectionsByGrade ?? {})
+            .flat()
+            .forEach((sectionOption) => {
+                uniqueSections.set(String(sectionOption.id), sectionOption);
+            });
+
+        return Array.from(uniqueSections.values());
     }, [sectionsByGrade]);
 
     const filteredSections = useMemo(() => {
@@ -84,7 +101,7 @@ export default function StudentsIndex() {
     }, [allSections, gradeLevel, sectionsByGrade]);
 
     useEffect(() => {
-        if (section && !filteredSections.includes(section)) {
+        if (section && !filteredSections.some((sectionOption) => String(sectionOption.id) === section)) {
             setSection('');
         }
     }, [filteredSections, section]);
@@ -174,8 +191,8 @@ export default function StudentsIndex() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {gradeLevels.map((level) => (
-                                                <SelectItem key={level} value={level}>
-                                                    {level}
+                                                <SelectItem key={level.id} value={String(level.id)}>
+                                                    {level.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -194,9 +211,9 @@ export default function StudentsIndex() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {filteredSections.length > 0 ? (
-                                                filteredSections.map((sec) => (
-                                                    <SelectItem key={sec} value={sec}>
-                                                        Section {sec}
+                                                filteredSections.map((sectionOption) => (
+                                                    <SelectItem key={sectionOption.id} value={String(sectionOption.id)}>
+                                                        Section {sectionOption.name}
                                                     </SelectItem>
                                                 ))
                                             ) : (
