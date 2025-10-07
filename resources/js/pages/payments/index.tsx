@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Pagination } from '@/components/pagination';
 import { Button } from '@/components/ui/button';
@@ -40,16 +40,20 @@ interface PaymentMethodOption {
 interface PageProps extends Record<string, unknown> {
     payments: PaginatedPayments;
     filters: {
-        search?: string;
-        date_from?: string;
-        date_to?: string;
-        purpose?: string;
-        cashier_id?: string;
-        payment_method?: string;
+        search?: string | null;
+        date_from?: string | null;
+        date_to?: string | null;
+        purpose?: string | null;
+        cashier_id?: string | null;
+        payment_method?: string | null;
+        per_page?: string | null;
     };
     purposes: string[];
     cashiers: CashierOption[];
     paymentMethods: PaymentMethodOption[];
+    perPageOptions: number[];
+    perPage: number;
+    defaultPerPage: number;
     auth: {
         user?: {
             can?: {
@@ -67,7 +71,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function PaymentsIndex() {
-    const { payments, filters, purposes, cashiers, paymentMethods, auth } = usePage<PageProps>().props;
+    const {
+        payments,
+        filters,
+        purposes,
+        cashiers,
+        paymentMethods,
+        perPageOptions,
+        perPage: currentPerPage,
+        defaultPerPage,
+        auth,
+    } = usePage<PageProps>().props;
 
     const [search, setSearch] = useState<string>(filters.search ?? '');
     const [dateFrom, setDateFrom] = useState<string>(filters.date_from ?? '');
@@ -75,8 +89,14 @@ export default function PaymentsIndex() {
     const [purpose, setPurpose] = useState<string>(filters.purpose ?? '');
     const [cashierId, setCashierId] = useState<string>(filters.cashier_id ?? '');
     const [paymentMethod, setPaymentMethod] = useState<string>(filters.payment_method ?? '');
+    const [perPage, setPerPage] = useState<string>(filters.per_page ?? String(currentPerPage ?? defaultPerPage));
 
     const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        const normalizedPerPage = filters.per_page ?? String(currentPerPage ?? defaultPerPage);
+        setPerPage(normalizedPerPage);
+    }, [currentPerPage, defaultPerPage, filters.per_page]);
 
     useEffect(() => {
         if (isFirstRender.current) {
@@ -94,6 +114,7 @@ export default function PaymentsIndex() {
                         purpose: purpose || undefined,
                         cashier_id: cashierId || undefined,
                         payment_method: paymentMethod || undefined,
+                        per_page: perPage || undefined,
                     },
                 }).url,
                 {},
@@ -106,7 +127,7 @@ export default function PaymentsIndex() {
         }, 250);
 
         return () => clearTimeout(timeout);
-    }, [search, dateFrom, dateTo, purpose, cashierId, paymentMethod]);
+    }, [search, dateFrom, dateTo, purpose, cashierId, paymentMethod, perPage]);
 
     const clearFilters = () => {
         setSearch('');
@@ -115,14 +136,8 @@ export default function PaymentsIndex() {
         setPurpose('');
         setCashierId('');
         setPaymentMethod('');
-        router.get(indexPayments().url, {}, { preserveScroll: true, replace: true });
+        setPerPage(String(defaultPerPage));
     };
-
-    const pageTotalAmount = useMemo(() => payments.data.reduce((sum, payment) => sum + payment.amount, 0), [payments.data]);
-
-    const printedCount = useMemo(() => payments.data.filter((payment) => payment.is_printed).length, [payments.data]);
-
-    const pendingPrintCount = payments.data.length - printedCount;
 
     const canCreatePayments = auth?.user?.can?.createPayments ?? false;
 
@@ -147,40 +162,6 @@ export default function PaymentsIndex() {
                     </CardHeader>
 
                     <CardContent className="space-y-4">
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <Card className="border-border/60 bg-muted/40">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-sm font-medium">Page total</CardTitle>
-                                    <CardDescription>Sum of payments shown on this page</CardDescription>
-                                </CardHeader>
-                                <CardContent className="pb-4">
-                                    <div className="text-2xl font-bold text-foreground">
-                                        ₱{pageTotalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-border/60">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-sm font-medium">Printed receipts</CardTitle>
-                                    <CardDescription>Marked as printed on this page</CardDescription>
-                                </CardHeader>
-                                <CardContent className="pb-4">
-                                    <div className="text-2xl font-bold text-foreground">{printedCount}</div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border-border/60">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-sm font-medium">Pending prints</CardTitle>
-                                    <CardDescription>Receipts awaiting print</CardDescription>
-                                </CardHeader>
-                                <CardContent className="pb-4">
-                                    <div className="text-2xl font-bold text-foreground">{pendingPrintCount}</div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
                         <div className="rounded-lg border bg-muted/40 p-4">
                             <div className="grid gap-4 md:grid-cols-6">
                                 <div className="flex flex-col gap-2 md:col-span-2">
@@ -261,11 +242,31 @@ export default function PaymentsIndex() {
 
                         <DataTable columns={paymentsColumns} data={payments.data} />
 
-                        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-                            <div className="text-sm text-muted-foreground">
+                        <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:items-center">
+                            <div className="text-center text-sm text-muted-foreground md:text-left">
                                 Showing <span className="font-medium text-foreground">{payments.from ?? 0}</span> to{' '}
                                 <span className="font-medium text-foreground">{payments.to ?? 0}</span> of{' '}
                                 <span className="font-medium text-foreground">{payments.total ?? 0}</span> payments
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Label htmlFor="rows-per-page" className="text-sm">
+                                    Rows per page
+                                </Label>
+                                <Select value={perPage || undefined} onValueChange={(value) => setPerPage(value)}>
+                                    <SelectTrigger id="rows-per-page" className="w-28">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {perPageOptions.map((option) => {
+                                            const value = option.toString();
+                                            return (
+                                                <SelectItem key={value} value={value}>
+                                                    {option}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <Pagination links={payments.links} />
                         </div>

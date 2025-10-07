@@ -23,6 +23,14 @@ class PaymentController extends Controller
     {
         $query = Payment::query()->with(['student', 'user']);
 
+        $perPageOptions = [10, 15, 25, 50];
+        $defaultPerPage = 15;
+        $perPage = $request->integer('per_page', $defaultPerPage);
+
+        if (! in_array($perPage, $perPageOptions, true)) {
+            $perPage = $defaultPerPage;
+        }
+
         // Search by student name or receipt number
         if ($request->filled('search')) {
             $search = $request->search;
@@ -59,7 +67,7 @@ class PaymentController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
-        $payments = $query->paginate(20)->withQueryString();
+    $payments = $query->paginate($perPage)->withQueryString();
 
         // Transform data
         $payments->getCollection()->transform(function ($payment) {
@@ -89,7 +97,15 @@ class PaymentController extends Controller
         });
 
         // Get payment purposes for filter
-        $purposes = Payment::select('payment_purpose')->distinct()->pluck('payment_purpose');
+        $purposes = Payment::query()
+            ->select('payment_purpose')
+            ->whereNotNull('payment_purpose')
+            ->distinct()
+            ->orderBy('payment_purpose')
+            ->pluck('payment_purpose')
+            ->filter()
+            ->values()
+            ->all();
 
         $cashiers = User::permission(['view payments', 'create payments'])
             ->select('id', 'name')
@@ -105,10 +121,21 @@ class PaymentController extends Controller
 
         return Inertia::render('payments/index', [
             'payments' => $payments,
-            'filters' => $request->only(['search', 'date_from', 'date_to', 'purpose', 'cashier_id', 'payment_method']),
+            'filters' => [
+                'search' => $request->input('search'),
+                'date_from' => $request->input('date_from'),
+                'date_to' => $request->input('date_to'),
+                'purpose' => $request->input('purpose'),
+                'cashier_id' => $request->input('cashier_id'),
+                'payment_method' => $request->input('payment_method'),
+                'per_page' => (string) $perPage,
+            ],
             'purposes' => $purposes,
             'cashiers' => $cashiers,
             'paymentMethods' => self::PAYMENT_METHOD_OPTIONS,
+            'perPageOptions' => $perPageOptions,
+            'perPage' => $perPage,
+            'defaultPerPage' => $defaultPerPage,
         ]);
     }
 
