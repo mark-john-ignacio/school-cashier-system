@@ -117,10 +117,10 @@ class StudentController extends Controller
             ->orderBy('name')
             ->get();
 
-        $gradeLevelOptions = $gradeLevels->pluck('name');
+        $gradeLevelOptions = $gradeLevels->map(fn ($g) => ['id' => $g->id, 'name' => $g->name])->all();
 
         $sectionsByGrade = $gradeLevels
-            ->mapWithKeys(fn ($grade) => [$grade->name => $grade->sections->pluck('name')->all()])
+            ->mapWithKeys(fn ($grade) => [$grade->id => $grade->sections->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])->all()])
             ->toArray();
 
         return Inertia::render('students/create', [
@@ -134,9 +134,53 @@ class StudentController extends Controller
      */
     public function store(StoreStudentRequest $request)
     {
-        $student = Student::create($request->validated());
+        $data = $request->validated();
 
-        return redirect()->route('students.show', $student)
+        // Resolve grade level to id
+        $gradeInput = $data['grade_level'] ?? null;
+        $grade = null;
+        if ($gradeInput !== null) {
+            if (is_numeric($gradeInput)) {
+                $grade = GradeLevel::find((int) $gradeInput);
+            } else {
+                $grade = GradeLevel::where('name', $gradeInput)
+                    ->orWhere('slug', $gradeInput)
+                    ->first();
+            }
+        }
+
+        if (! $grade) {
+            return back()->withErrors(['grade_level' => 'Selected grade level is invalid'])->withInput();
+        }
+
+        // Resolve section to id (prefer section within grade level)
+        $sectionInput = $data['section'] ?? null;
+        $section = null;
+        if ($sectionInput !== null) {
+            if (is_numeric($sectionInput)) {
+                $section = Section::find((int) $sectionInput);
+            } else {
+                $q = Section::where('name', $sectionInput)->orWhere('slug', $sectionInput);
+                if ($grade) {
+                    $q->where('grade_level_id', $grade->id);
+                }
+                $section = $q->first();
+            }
+        }
+
+        if (! $section) {
+            return back()->withErrors(['section' => 'Selected section is invalid'])->withInput();
+        }
+
+        // Prepare payload for mass assignment
+        $payload = $data;
+        $payload['grade_level_id'] = $grade->id;
+        $payload['section_id'] = $section->id;
+        unset($payload['grade_level'], $payload['section']);
+
+        $student = Student::create($payload);
+
+        return redirect('/students/' . $student->id)
             ->with('success', 'Student added successfully.');
     }
 
@@ -203,10 +247,10 @@ class StudentController extends Controller
             ->orderBy('name')
             ->get();
 
-        $gradeLevelOptions = $gradeLevels->pluck('name');
+        $gradeLevelOptions = $gradeLevels->map(fn ($g) => ['id' => $g->id, 'name' => $g->name])->all();
 
         $sectionsByGrade = $gradeLevels
-            ->mapWithKeys(fn ($grade) => [$grade->name => $grade->sections->pluck('name')->all()])
+            ->mapWithKeys(fn ($grade) => [$grade->id => $grade->sections->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])->all()])
             ->toArray();
 
         return Inertia::render('students/edit', [
@@ -216,8 +260,8 @@ class StudentController extends Controller
                 'first_name' => $student->first_name,
                 'middle_name' => $student->middle_name,
                 'last_name' => $student->last_name,
-                'grade_level' => $student->gradeLevel?->name ?? '',
-                'section' => $student->section?->name ?? '',
+                'grade_level' => $student->gradeLevel?->id ?? '',
+                'section' => $student->section?->id ?? '',
                 'contact_number' => $student->contact_number,
                 'email' => $student->email,
                 'parent_name' => $student->parent_name,
@@ -236,9 +280,54 @@ class StudentController extends Controller
      */
     public function update(UpdateStudentRequest $request, Student $student)
     {
-        $student->update($request->validated());
+        $data = $request->validated();
 
-        return redirect()->route('students.show', $student)
+        // Resolve grade level to id
+        $gradeInput = $data['grade_level'] ?? null;
+        $grade = null;
+        if ($gradeInput !== null) {
+            if (is_numeric($gradeInput)) {
+                $grade = GradeLevel::find((int) $gradeInput);
+            } else {
+                $grade = GradeLevel::where('name', $gradeInput)
+                    ->orWhere('slug', $gradeInput)
+                    ->first();
+            }
+        }
+
+        if (! $grade) {
+            return back()->withErrors(['grade_level' => 'Selected grade level is invalid'])->withInput();
+        }
+
+        // Resolve section to id (prefer section within grade level)
+        $sectionInput = $data['section'] ?? null;
+        $section = null;
+        if ($sectionInput !== null) {
+            if (is_numeric($sectionInput)) {
+                $section = Section::find((int) $sectionInput);
+            } else {
+                $q = Section::where('name', $sectionInput)->orWhere('slug', $sectionInput);
+                if ($grade) {
+                    $q->where('grade_level_id', $grade->id);
+                }
+                $section = $q->first();
+            }
+        }
+
+        if (! $section) {
+            return back()->withErrors(['section' => 'Selected section is invalid'])->withInput();
+        }
+
+        // Prepare payload for update and assign explicitly to avoid mass-assignment surprises
+        $payload = $data;
+        unset($payload['grade_level'], $payload['section']);
+
+        $student->fill($payload);
+        $student->grade_level_id = $grade->id;
+        $student->section_id = $section->id;
+        $student->save();
+
+        return redirect('/students/' . $student->id)
             ->with('success', 'Student updated successfully.');
     }
 

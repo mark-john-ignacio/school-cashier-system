@@ -4,16 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { index as indexStudents, store as storeStudent } from '@/routes/students';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 
+interface GradeOption {
+    id: number;
+    name: string;
+}
+
+interface SectionOption {
+    id: number;
+    name: string;
+}
+
 interface PageProps extends Record<string, unknown> {
-    gradeLevels: string[];
-    sectionsByGrade: Record<string, string[]>;
+    gradeLevels: GradeOption[];
+    sectionsByGrade: Record<string, SectionOption[]>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -31,8 +41,8 @@ export default function CreateStudent() {
         first_name: '',
         middle_name: '',
         last_name: '',
-        grade_level: '',
-        section: '',
+        grade_level: '' as number | '',
+        section: '' as number | '',
         contact_number: '',
         email: '',
         parent_name: '',
@@ -44,15 +54,16 @@ export default function CreateStudent() {
 
     const filteredSections = useMemo(() => {
         if (!data.grade_level) {
-            return [] as string[];
+            return [] as SectionOption[];
         }
 
-        return sectionsByGrade?.[data.grade_level] ?? [];
+        return sectionsByGrade?.[String(data.grade_level)] ?? [];
     }, [data.grade_level, sectionsByGrade]);
 
     useEffect(() => {
-        if (data.section && !filteredSections.includes(data.section)) {
-            setData('section', '');
+        if (data.section) {
+            const found = filteredSections.some((s) => String(s.id) === String(data.section));
+            if (!found) setData('section', '');
         }
     }, [data.section, filteredSections, setData]);
 
@@ -147,14 +158,17 @@ export default function CreateStudent() {
                                         <Label htmlFor="grade_level">
                                             Grade Level <span className="text-red-500">*</span>
                                         </Label>
-                                        <Select value={data.grade_level} onValueChange={(value) => setData('grade_level', value)}>
+                                        <Select
+                                            value={String(data.grade_level || '')}
+                                            onValueChange={(value) => setData('grade_level', Number(value) || '')}
+                                        >
                                             <SelectTrigger id="grade_level">
                                                 <SelectValue placeholder="Select grade level" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {gradeLevels.map((level) => (
-                                                    <SelectItem key={level} value={level}>
-                                                        {level}
+                                                {gradeLevels.map((level: GradeOption) => (
+                                                    <SelectItem key={level.id} value={String(level.id)}>
+                                                        {level.name}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -167,8 +181,8 @@ export default function CreateStudent() {
                                             Section <span className="text-red-500">*</span>
                                         </Label>
                                         <Select
-                                            value={data.section || undefined}
-                                            onValueChange={(value) => setData('section', value)}
+                                            value={String(data.section || '')}
+                                            onValueChange={(value) => setData('section', Number(value) || '')}
                                             disabled={!data.grade_level || filteredSections.length === 0}
                                         >
                                             <SelectTrigger id="section">
@@ -184,15 +198,19 @@ export default function CreateStudent() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {filteredSections.length > 0 ? (
-                                                    filteredSections.map((sectionOption) => (
-                                                        <SelectItem key={sectionOption} value={sectionOption}>
-                                                            Section {sectionOption}
-                                                        </SelectItem>
-                                                    ))
+                                                    <SelectGroup>
+                                                        {filteredSections.map((sectionOption: SectionOption) => (
+                                                            <SelectItem key={sectionOption.id} value={String(sectionOption.id)}>
+                                                                Section {sectionOption.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectGroup>
                                                 ) : (
-                                                    <SelectLabel className="text-muted-foreground">
-                                                        {data.grade_level ? 'No sections available' : 'Select a grade level first'}
-                                                    </SelectLabel>
+                                                    <SelectGroup>
+                                                        <SelectLabel className="text-muted-foreground">
+                                                            {data.grade_level ? 'No sections available' : 'Select a grade level first'}
+                                                        </SelectLabel>
+                                                    </SelectGroup>
                                                 )}
                                             </SelectContent>
                                         </Select>

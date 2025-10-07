@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('middle_name')->nullable();
             $table->string('last_name');
-            $table->string('grade_level');
-            $table->string('section');
+            $table->unsignedBigInteger('grade_level_id');
+            $table->unsignedBigInteger('section_id');
             $table->string('contact_number')->nullable();
             $table->string('email')->nullable();
             $table->string('parent_name')->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             
-            $table->index(['grade_level', 'section']);
+            $table->index(['grade_level_id', 'section_id']);
             $table->index('status');
         });
     }

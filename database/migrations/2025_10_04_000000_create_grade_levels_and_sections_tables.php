@@ -37,118 +37,162 @@ return new class extends Migration
             $table->unique(['grade_level_id', 'slug']);
         });
 
-        Schema::table('students', function (Blueprint $table) {
-            $table->foreignId('grade_level_id')->nullable()->after('last_name')->constrained('grade_levels')->restrictOnDelete();
-            $table->foreignId('section_id')->nullable()->after('grade_level_id')->constrained('sections')->nullOnDelete();
-        });
+        if (! Schema::hasColumn('students', 'grade_level_id') && ! Schema::hasColumn('students', 'section_id')) {
+            Schema::table('students', function (Blueprint $table) {
+                $table->foreignId('grade_level_id')->nullable()->after('last_name')->constrained('grade_levels')->restrictOnDelete();
+                $table->foreignId('section_id')->nullable()->after('grade_level_id')->constrained('sections')->nullOnDelete();
+            });
+        }
 
         Schema::table('fee_structures', function (Blueprint $table) {
             $table->foreignId('grade_level_id')->nullable()->after('id')->constrained('grade_levels')->restrictOnDelete();
             $table->boolean('is_required')->default(true)->after('description');
         });
 
-        // Populate grade levels from existing data
-        $gradeLevels = collect()
-            ->merge(DB::table('students')->distinct()->pluck('grade_level'))
-            ->merge(DB::table('fee_structures')->distinct()->pluck('grade_level'))
-            ->filter()
-            ->unique()
-            ->values();
+        // If legacy columns exist, populate new grade/section tables and migrate values.
+        if (Schema::hasColumn('students', 'grade_level') || Schema::hasColumn('fee_structures', 'grade_level')) {
+            // Populate grade levels from existing data
+            $gradeLevels = collect()
+                ->merge(Schema::hasColumn('students', 'grade_level') ? DB::table('students')->distinct()->pluck('grade_level') : collect())
+                ->merge(Schema::hasColumn('fee_structures', 'grade_level') ? DB::table('fee_structures')->distinct()->pluck('grade_level') : collect())
+                ->filter()
+                ->unique()
+                ->values();
 
-        $now = now();
-        $gradeLevelMap = [];
-        foreach ($gradeLevels as $index => $name) {
-            $slug = Str::slug($name);
+            $now = now();
+            $gradeLevelMap = [];
+            foreach ($gradeLevels as $index => $name) {
+                $slug = Str::slug($name);
 
-            // Ensure slug uniqueness
-            $baseSlug = $slug ?: Str::slug('grade-' . ($index + 1));
-            $slug = $baseSlug;
-            $suffix = 1;
-            while (DB::table('grade_levels')->where('slug', $slug)->exists()) {
-                $slug = $baseSlug . '-' . $suffix;
-                $suffix++;
+                // Ensure slug uniqueness
+                $baseSlug = $slug ?: Str::slug('grade-' . ($index + 1));
+                $slug = $baseSlug;
+                $suffix = 1;
+                while (DB::table('grade_levels')->where('slug', $slug)->exists()) {
+                    $slug = $baseSlug . '-' . $suffix;
+                    $suffix++;
+                }
+
+                $gradeLevelId = DB::table('grade_levels')->insertGetId([
+                    'name' => $name,
+                    'slug' => $slug,
+                    'display_order' => $index + 1,
+                    'description' => null,
+                    'is_active' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+
+                $gradeLevelMap[$name] = $gradeLevelId;
             }
 
-            $gradeLevelId = DB::table('grade_levels')->insertGetId([
-                'name' => $name,
-                'slug' => $slug,
-                'display_order' => $index + 1,
-                'description' => null,
-                'is_active' => true,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
-
-            $gradeLevelMap[$name] = $gradeLevelId;
-        }
-
-        // Update students with grade_level_id
-        foreach ($gradeLevelMap as $name => $id) {
-            DB::table('students')->where('grade_level', $name)->update(['grade_level_id' => $id]);
-        }
-
-        // Populate sections based on existing student data
-        $sections = DB::table('students')
-            ->select('grade_level', 'section')
-            ->whereNotNull('section')
-            ->where('section', '!=', '')
-            ->distinct()
-            ->get();
-
-        foreach ($sections as $section) {
-            $gradeLevelId = $gradeLevelMap[$section->grade_level] ?? null;
-            if (!$gradeLevelId) {
-                continue;
+            // Update students with grade_level_id
+            if (Schema::hasColumn('students', 'grade_level')) {
+                foreach ($gradeLevelMap as $name => $id) {
+                    DB::table('students')->where('grade_level', $name)->update(['grade_level_id' => $id]);
+                }
             }
 
-            $baseSlug = Str::slug($section->section);
-            $slug = $baseSlug ?: Str::slug('section-' . $section->section);
-            $suffix = 1;
-            while (DB::table('sections')->where('grade_level_id', $gradeLevelId)->where('slug', $slug)->exists()) {
-                $slug = $baseSlug . '-' . $suffix;
-                $suffix++;
+            // Populate sections based on existing student data
+            if (Schema::hasColumn('students', 'section')) {
+                $sections = DB::table('students')
+                    ->select('grade_level', 'section')
+                    ->whereNotNull('section')
+                    ->where('section', '!=', '')
+                    ->distinct()
+                    ->get();
+
+                foreach ($sections as $section) {
+                    $gradeLevelId = $gradeLevelMap[$section->grade_level] ?? null;
+                    if (!$gradeLevelId) {
+                        continue;
+                    }
+
+                    $baseSlug = Str::slug($section->section);
+                    $slug = $baseSlug ?: Str::slug('section-' . $section->section);
+                    $suffix = 1;
+                    while (DB::table('sections')->where('grade_level_id', $gradeLevelId)->where('slug', $slug)->exists()) {
+                        $slug = $baseSlug . '-' . $suffix;
+                        $suffix++;
+                    }
+
+                    $sectionId = DB::table('sections')->insertGetId([
+                        'grade_level_id' => $gradeLevelId,
+                        'name' => $section->section,
+                        'slug' => $slug,
+                        'description' => null,
+                        'is_active' => true,
+                        'display_order' => 0,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+
+                    DB::table('students')
+                        ->where('grade_level', $section->grade_level)
+                        ->where('section', $section->section)
+                        ->update(['section_id' => $sectionId]);
+                }
             }
 
-            $sectionId = DB::table('sections')->insertGetId([
-                'grade_level_id' => $gradeLevelId,
-                'name' => $section->section,
-                'slug' => $slug,
-                'description' => null,
-                'is_active' => true,
-                'display_order' => 0,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            // Update fee structures with grade_level_id
+            if (Schema::hasColumn('fee_structures', 'grade_level')) {
+                foreach ($gradeLevelMap as $name => $id) {
+                    DB::table('fee_structures')->where('grade_level', $name)->update(['grade_level_id' => $id]);
+                }
+            }
 
-            DB::table('students')
-                ->where('grade_level', $section->grade_level)
-                ->where('section', $section->section)
-                ->update(['section_id' => $sectionId]);
+            // Ensure new foreign keys are not null where possible
+            $defaultGradeLevelId = !empty($gradeLevelMap) ? reset($gradeLevelMap) : null;
+
+            if ($defaultGradeLevelId) {
+                if (Schema::hasColumn('students', 'grade_level_id')) {
+                    DB::table('students')->whereNull('grade_level_id')->update(['grade_level_id' => $defaultGradeLevelId]);
+                }
+                if (Schema::hasColumn('fee_structures', 'grade_level_id')) {
+                    DB::table('fee_structures')->whereNull('grade_level_id')->update(['grade_level_id' => $defaultGradeLevelId]);
+                }
+            }
+
+            if (Schema::hasColumn('students', 'grade_level') || Schema::hasColumn('students', 'section')) {
+                Schema::table('students', function (Blueprint $table) {
+                    try {
+                        $table->dropIndex('students_grade_level_section_index');
+                    } catch (\Throwable $e) {
+                        // ignore if index doesn't exist
+                    }
+                    $cols = [];
+                    if (Schema::hasColumn('students', 'grade_level')) $cols[] = 'grade_level';
+                    if (Schema::hasColumn('students', 'section')) $cols[] = 'section';
+                    if (!empty($cols)) {
+                        try {
+                            $table->dropColumn($cols);
+                        } catch (\Throwable $e) {
+                            // ignore if columns already dropped
+                        }
+                    }
+                });
+            }
+
+            if (Schema::hasColumn('fee_structures', 'grade_level')) {
+                Schema::table('fee_structures', function (Blueprint $table) {
+                    try {
+                        $table->dropUnique('fee_structures_grade_level_fee_type_school_year_unique');
+                    } catch (\Throwable $e) {
+                        // ignore if unique doesn't exist
+                    }
+                    try {
+                        $table->dropColumn('grade_level');
+                    } catch (\Throwable $e) {
+                        // ignore if column missing
+                    }
+                    try {
+                        $table->unique(['grade_level_id', 'fee_type', 'school_year']);
+                    } catch (\Throwable $e) {
+                        // ignore if unique can't be created
+                    }
+                });
+            }
         }
-
-        // Update fee structures with grade_level_id
-        foreach ($gradeLevelMap as $name => $id) {
-            DB::table('fee_structures')->where('grade_level', $name)->update(['grade_level_id' => $id]);
-        }
-
-        // Ensure new foreign keys are not null where possible
-        $defaultGradeLevelId = !empty($gradeLevelMap) ? reset($gradeLevelMap) : null;
-
-        if ($defaultGradeLevelId) {
-            DB::table('students')->whereNull('grade_level_id')->update(['grade_level_id' => $defaultGradeLevelId]);
-            DB::table('fee_structures')->whereNull('grade_level_id')->update(['grade_level_id' => $defaultGradeLevelId]);
-        }
-
-        Schema::table('students', function (Blueprint $table) {
-            $table->dropIndex('students_grade_level_section_index');
-            $table->dropColumn(['grade_level', 'section']);
-        });
-
-        Schema::table('fee_structures', function (Blueprint $table) {
-            $table->dropUnique('fee_structures_grade_level_fee_type_school_year_unique');
-            $table->dropColumn('grade_level');
-            $table->unique(['grade_level_id', 'fee_type', 'school_year']);
-        });
     }
 
     /**
