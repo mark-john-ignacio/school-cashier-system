@@ -3,7 +3,7 @@ import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import AcademicsLayout from '@/layouts/academics/layout';
 import AppLayout from '@/layouts/app-layout';
 import feeStructureRoutes from '@/routes/academics/fee-structures';
 import { type BreadcrumbItem } from '@/types';
@@ -128,154 +127,177 @@ export default function FeeStructuresPage() {
         });
     };
 
-    const actions = (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Select value={gradeLevelFilterValue} onValueChange={(value) => applyFilters({ grade_level_id: value })}>
-                <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="Grade level" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All grade levels</SelectItem>
-                    {gradeLevels.map((gradeLevel) => (
-                        <SelectItem key={gradeLevel.id} value={gradeLevel.id.toString()}>
-                            {gradeLevel.name}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-
-            <Select value={schoolYearFilterValue} onValueChange={(value) => applyFilters({ school_year: value })}>
-                <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="School year" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="current">Current year</SelectItem>
-                    {schoolYears.map((year) => (
-                        <SelectItem key={year} value={String(year)}>
-                            {year}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-
-            <Select value={statusFilterValue} onValueChange={(value) => applyFilters({ status: value })}>
-                <SelectTrigger className="w-full sm:w-40">
-                    <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="active">Active only</SelectItem>
-                    <SelectItem value="inactive">Inactive only</SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Button type="button" onClick={() => setDialogState({ mode: 'create' })} disabled={gradeLevels.length === 0}>
-                <Plus className="h-4 w-4" />
-                New fee
-            </Button>
-        </div>
-    );
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Fee structures" />
 
-            <AcademicsLayout
-                title="Fee structures"
-                description="Control tuition, miscellaneous charges, and optional fees per grade level and year."
-                breadcrumbs={breadcrumbs}
-                actions={actions}
-            >
-                <div className="grid gap-6 lg:grid-cols-3">
-                    {metrics.map((metric) => (
-                        <Card key={metric.title} className="shadow-sm">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">{metric.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <span className="text-2xl font-semibold text-foreground">{metric.value}</span>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-
-                <Card className="shadow-sm">
-                    <CardHeader className="border-b pb-4">
-                        <HeadingSmall title="Fee library" description="Search, filter, and update the fee catalog for each grade level." />
+            <div className="p-4 md:p-8">
+                <Card>
+                    <CardHeader>
+                        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                            <div>
+                                <CardTitle>Fee structures</CardTitle>
+                                <CardDescription>Control tuition, miscellaneous charges, and optional fees per grade level and year.</CardDescription>
+                            </div>
+                            <Button type="button" onClick={() => setDialogState({ mode: 'create' })} disabled={gradeLevels.length === 0}>
+                                <Plus className="h-4 w-4" />
+                                New fee
+                            </Button>
+                        </div>
                     </CardHeader>
-                    <CardContent className="pt-6">
-                        {gradeLevels.length === 0 ? (
-                            <div className="rounded-lg border border-dashed py-12 text-center text-sm text-muted-foreground">
-                                Create grade levels before configuring fees.
+
+                    <CardContent className="space-y-6">
+                        <div className="grid gap-6 lg:grid-cols-3">
+                            {metrics.map((metric) => (
+                                <Card key={metric.title} className="shadow-sm">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">{metric.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <span className="text-2xl font-semibold text-foreground">{metric.value}</span>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+
+                        <div className="rounded-lg border bg-muted/40 p-4">
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="fee-grade-filter">Grade level</Label>
+                                    <Select value={gradeLevelFilterValue} onValueChange={(value) => applyFilters({ grade_level_id: value })}>
+                                        <SelectTrigger id="fee-grade-filter">
+                                            <SelectValue placeholder="All grade levels" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All grade levels</SelectItem>
+                                            {gradeLevels.map((gradeLevel) => (
+                                                <SelectItem key={gradeLevel.id} value={gradeLevel.id.toString()}>
+                                                    {gradeLevel.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="fee-year-filter">School year</Label>
+                                    <Select value={schoolYearFilterValue} onValueChange={(value) => applyFilters({ school_year: value })}>
+                                        <SelectTrigger id="fee-year-filter">
+                                            <SelectValue placeholder="All school years" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="current">Current year</SelectItem>
+                                            {schoolYears.map((year) => (
+                                                <SelectItem key={year} value={String(year)}>
+                                                    {year}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="flex flex-col gap-2">
+                                    <Label htmlFor="fee-status-filter">Status</Label>
+                                    <Select value={statusFilterValue} onValueChange={(value) => applyFilters({ status: value })}>
+                                        <SelectTrigger id="fee-status-filter">
+                                            <SelectValue placeholder="All statuses" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All statuses</SelectItem>
+                                            <SelectItem value="active">Active only</SelectItem>
+                                            <SelectItem value="inactive">Inactive only</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                        ) : feeStructures.length === 0 ? (
-                            <div className="rounded-lg border border-dashed py-12 text-center text-sm text-muted-foreground">
-                                No fee structures match the selected filters. Add a new fee to get started.
+
+                            <div className="mt-4 flex justify-end">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => applyFilters({ grade_level_id: 'all', school_year: 'current', status: 'all' })}
+                                >
+                                    Reset filters
+                                </Button>
                             </div>
-                        ) : (
-                            <div className="overflow-hidden rounded-lg border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="bg-muted/40">
-                                            <TableHead className="w-[18%]">Grade level</TableHead>
-                                            <TableHead>Fee</TableHead>
-                                            <TableHead className="w-[12%] text-right">Amount</TableHead>
-                                            <TableHead className="w-[15%]">School year</TableHead>
-                                            <TableHead className="w-[15%]">Tags</TableHead>
-                                            <TableHead className="w-[10%] text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {feeStructures.map((fee) => (
-                                            <TableRow key={fee.id} className="hover:bg-muted/20">
-                                                <TableCell className="font-medium text-foreground">{fee.grade_level_name ?? '—'}</TableCell>
-                                                <TableCell>
-                                                    <div className="space-y-1">
-                                                        <p className="font-medium text-foreground">{fee.fee_type}</p>
-                                                        {fee.description && <p className="text-xs text-muted-foreground">{fee.description}</p>}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-right font-semibold text-foreground">
-                                                    {formatCurrency(fee.amount)}
-                                                </TableCell>
-                                                <TableCell>{fee.school_year}</TableCell>
-                                                <TableCell>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        <Badge variant={fee.is_required ? 'secondary' : 'outline'}>
-                                                            {fee.is_required ? 'Required' : 'Optional'}
-                                                        </Badge>
-                                                        <Badge variant={fee.is_active ? 'secondary' : 'outline'}>
-                                                            {fee.is_active ? 'Active' : 'Inactive'}
-                                                        </Badge>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    <div className="flex justify-end gap-1">
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            onClick={() => setDialogState({ mode: 'edit', feeStructure: fee })}
-                                                        >
-                                                            <Pencil className="h-4 w-4" />
-                                                            <span className="sr-only">Edit</span>
-                                                        </Button>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            className="text-destructive hover:text-destructive"
-                                                            onClick={() => handleDelete(fee)}
-                                                        >
-                                                            <Trash className="h-4 w-4" />
-                                                            <span className="sr-only">Delete</span>
-                                                        </Button>
-                                                    </div>
-                                                </TableCell>
+                        </div>
+
+                        <div className="space-y-6 rounded-lg border border-border/60 bg-muted/30 p-6">
+                            <HeadingSmall title="Fee library" description="Search, filter, and update the fee catalog for each grade level." />
+
+                            {gradeLevels.length === 0 ? (
+                                <div className="rounded-lg border border-dashed py-12 text-center text-sm text-muted-foreground">
+                                    Create grade levels before configuring fees.
+                                </div>
+                            ) : feeStructures.length === 0 ? (
+                                <div className="rounded-lg border border-dashed py-12 text-center text-sm text-muted-foreground">
+                                    No fee structures match the selected filters. Add a new fee to get started.
+                                </div>
+                            ) : (
+                                <div className="overflow-hidden rounded-lg border">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow className="bg-muted/40">
+                                                <TableHead className="w-[18%]">Grade level</TableHead>
+                                                <TableHead>Fee</TableHead>
+                                                <TableHead className="w-[12%] text-right">Amount</TableHead>
+                                                <TableHead className="w-[15%]">School year</TableHead>
+                                                <TableHead className="w-[15%]">Tags</TableHead>
+                                                <TableHead className="w-[10%] text-right">Actions</TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        )}
+                                        </TableHeader>
+                                        <TableBody>
+                                            {feeStructures.map((fee) => (
+                                                <TableRow key={fee.id} className="hover:bg-muted/20">
+                                                    <TableCell className="font-medium text-foreground">{fee.grade_level_name ?? '—'}</TableCell>
+                                                    <TableCell>
+                                                        <div className="space-y-1">
+                                                            <p className="font-medium text-foreground">{fee.fee_type}</p>
+                                                            {fee.description && <p className="text-xs text-muted-foreground">{fee.description}</p>}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-semibold text-foreground">
+                                                        {formatCurrency(fee.amount)}
+                                                    </TableCell>
+                                                    <TableCell>{fee.school_year}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <Badge variant={fee.is_required ? 'secondary' : 'outline'}>
+                                                                {fee.is_required ? 'Required' : 'Optional'}
+                                                            </Badge>
+                                                            <Badge variant={fee.is_active ? 'secondary' : 'outline'}>
+                                                                {fee.is_active ? 'Active' : 'Inactive'}
+                                                            </Badge>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex justify-end gap-1">
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                onClick={() => setDialogState({ mode: 'edit', feeStructure: fee })}
+                                                            >
+                                                                <Pencil className="h-4 w-4" />
+                                                                <span className="sr-only">Edit</span>
+                                                            </Button>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="text-destructive hover:text-destructive"
+                                                                onClick={() => handleDelete(fee)}
+                                                            >
+                                                                <Trash className="h-4 w-4" />
+                                                                <span className="sr-only">Delete</span>
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -285,7 +307,7 @@ export default function FeeStructuresPage() {
                     gradeLevels={gradeLevels}
                     defaultSchoolYear={schoolYearFilterValue === 'current' ? '' : schoolYearFilterValue}
                 />
-            </AcademicsLayout>
+            </div>
         </AppLayout>
     );
 }

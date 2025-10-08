@@ -5,14 +5,13 @@ import InputError from '@/components/input-error';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import AcademicsLayout from '@/layouts/academics/layout';
 import AppLayout from '@/layouts/app-layout';
 import feeStructureRoutes from '@/routes/academics/fee-structures';
 import gradeLevelRoutes from '@/routes/academics/grade-levels';
@@ -160,215 +159,232 @@ export default function GradeLevelsPage() {
         });
     };
 
-    const actions = (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Select value={schoolYearValue} onValueChange={handleSchoolYearChange}>
-                <SelectTrigger className="w-full sm:w-48">
-                    <SelectValue placeholder="School year" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="current">Current school year</SelectItem>
-                    {schoolYears.map((year) => (
-                        <SelectItem key={year} value={String(year)}>
-                            {year}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-
-            <Button type="button" onClick={() => setGradeLevelDialog({ mode: 'create' })}>
-                <Plus className="h-4 w-4" />
-                New grade level
-            </Button>
-        </div>
-    );
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Grade levels" />
 
-            <AcademicsLayout
-                title="Grade levels"
-                description="Define the academic hierarchy, attach sections, and monitor active enrollment per level."
-                breadcrumbs={breadcrumbs}
-                actions={actions}
-            >
-                <div className="grid gap-6 lg:grid-cols-3">
-                    {stats.map((stat) => (
-                        <Card key={stat.title} className="shadow-sm">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <span className="text-2xl font-semibold text-foreground">{stat.value}</span>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-
-                <Card className="shadow-sm">
-                    <CardHeader className="border-b pb-4">
-                        <HeadingSmall
-                            title="Grade level directory"
-                            description="Open a grade level to manage sections, description, and fee snapshot."
-                        />
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        {gradeLevels.length === 0 ? (
-                            <div className="rounded-lg border border-dashed py-12 text-center">
-                                <p className="text-sm text-muted-foreground">
-                                    No grade levels yet. Add your first level to start organizing the academic structure.
-                                </p>
+            <div className="p-4 md:p-8">
+                <Card>
+                    <CardHeader>
+                        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                            <div>
+                                <CardTitle>Grade levels</CardTitle>
+                                <CardDescription>
+                                    Define the academic hierarchy, attach sections, and monitor active enrollment per level.
+                                </CardDescription>
                             </div>
-                        ) : (
-                            <Accordion type="single" collapsible className="space-y-3">
-                                {gradeLevels.map((gradeLevel) => (
-                                    <AccordionItem key={gradeLevel.id} value={gradeLevel.slug} className="overflow-hidden rounded-lg border">
-                                        <AccordionTrigger className="flex items-center justify-between bg-muted/40 px-4 py-3 text-left text-base font-medium hover:no-underline">
-                                            <div className="flex flex-col gap-1 text-left">
-                                                <div className="flex items-center gap-2">
-                                                    <span>{gradeLevel.name}</span>
-                                                    <Badge variant={gradeLevel.is_active ? 'secondary' : 'outline'}>
-                                                        {gradeLevel.is_active ? 'Active' : 'Inactive'}
-                                                    </Badge>
+                            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+                                <Select value={schoolYearValue} onValueChange={handleSchoolYearChange}>
+                                    <SelectTrigger className="w-full sm:w-48">
+                                        <SelectValue placeholder="School year" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="current">Current school year</SelectItem>
+                                        {schoolYears.map((year) => (
+                                            <SelectItem key={year} value={String(year)}>
+                                                {year}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Button type="button" onClick={() => setGradeLevelDialog({ mode: 'create' })} className="w-full sm:w-auto">
+                                    <Plus className="h-4 w-4" />
+                                    New grade level
+                                </Button>
+                            </div>
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="space-y-6">
+                        <div className="grid gap-6 lg:grid-cols-3">
+                            {stats.map((stat) => (
+                                <Card key={stat.title} className="shadow-sm">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <span className="text-2xl font-semibold text-foreground">{stat.value}</span>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+
+                        <div className="space-y-6 rounded-lg border border-border/60 bg-muted/30 p-6">
+                            <HeadingSmall
+                                title="Grade level directory"
+                                description="Open a grade level to manage sections, description, and fee snapshot."
+                            />
+
+                            {gradeLevels.length === 0 ? (
+                                <div className="rounded-lg border border-dashed py-12 text-center">
+                                    <p className="text-sm text-muted-foreground">
+                                        No grade levels yet. Add your first level to start organizing the academic structure.
+                                    </p>
+                                </div>
+                            ) : (
+                                <Accordion type="single" collapsible className="space-y-3">
+                                    {gradeLevels.map((gradeLevel) => (
+                                        <AccordionItem key={gradeLevel.id} value={gradeLevel.slug} className="overflow-hidden rounded-lg border">
+                                            <AccordionTrigger className="flex items-center justify-between bg-muted/40 px-4 py-3 text-left text-base font-medium hover:no-underline">
+                                                <div className="flex flex-col gap-1 text-left">
+                                                    <div className="flex items-center gap-2">
+                                                        <span>{gradeLevel.name}</span>
+                                                        <Badge variant={gradeLevel.is_active ? 'secondary' : 'outline'}>
+                                                            {gradeLevel.is_active ? 'Active' : 'Inactive'}
+                                                        </Badge>
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {gradeLevel.description ? gradeLevel.description : 'No description provided yet.'}
+                                                    </p>
                                                 </div>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {gradeLevel.description ? gradeLevel.description : 'No description provided yet.'}
-                                                </p>
-                                            </div>
 
-                                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                                <span>{gradeLevel.sections_count} sections</span>
-                                                <span>{gradeLevel.students_count} students</span>
-                                                <span>{formatCurrency(gradeLevel.fee_total)} fees</span>
-                                            </div>
-                                        </AccordionTrigger>
+                                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                    <span>{gradeLevel.sections_count} sections</span>
+                                                    <span>{gradeLevel.students_count} students</span>
+                                                    <span>{formatCurrency(gradeLevel.fee_total)} fees</span>
+                                                </div>
+                                            </AccordionTrigger>
 
-                                        <AccordionContent className="space-y-6 bg-background px-4 py-6">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <Button size="sm" variant="outline" onClick={() => setGradeLevelDialog({ mode: 'edit', gradeLevel })}>
-                                                    <Pencil className="h-4 w-4" />
-                                                    Edit grade level
-                                                </Button>
-                                                <Button size="sm" variant="outline" onClick={() => setSectionDialog({ mode: 'create', gradeLevel })}>
-                                                    <Plus className="h-4 w-4" />
-                                                    Add section
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="text-destructive hover:text-destructive"
-                                                    onClick={() => handleDeleteGradeLevel(gradeLevel)}
-                                                >
-                                                    <Trash className="h-4 w-4" />
-                                                    Archive
-                                                </Button>
-                                            </div>
+                                            <AccordionContent className="space-y-6 bg-background px-4 py-6">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => setGradeLevelDialog({ mode: 'edit', gradeLevel })}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                        Edit grade level
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => setSectionDialog({ mode: 'create', gradeLevel })}
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                        Add section
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="text-destructive hover:text-destructive"
+                                                        onClick={() => handleDeleteGradeLevel(gradeLevel)}
+                                                    >
+                                                        <Trash className="h-4 w-4" />
+                                                        Archive
+                                                    </Button>
+                                                </div>
 
-                                            <div className="grid gap-6 lg:grid-cols-2">
-                                                <div className="space-y-3">
-                                                    <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">Sections</h3>
-                                                    {gradeLevel.sections.length === 0 ? (
-                                                        <div className="rounded-lg border border-dashed px-4 py-6 text-sm text-muted-foreground">
-                                                            No sections yet. Add sections to manage homerooms or strands.
-                                                        </div>
-                                                    ) : (
-                                                        <div className="divide-y rounded-lg border">
-                                                            {gradeLevel.sections.map((section) => (
-                                                                <div key={section.id} className="flex items-start justify-between gap-4 px-4 py-3">
-                                                                    <div>
-                                                                        <p className="font-medium text-foreground">{section.name}</p>
-                                                                        {section.description && (
-                                                                            <p className="text-xs text-muted-foreground">{section.description}</p>
-                                                                        )}
-                                                                        <div className="mt-2 flex gap-2 text-xs text-muted-foreground">
-                                                                            <Badge variant={section.is_active ? 'secondary' : 'outline'}>
-                                                                                {section.is_active ? 'Active' : 'Inactive'}
-                                                                            </Badge>
-                                                                            {section.display_order !== null && (
-                                                                                <span>Order {section.display_order}</span>
+                                                <div className="grid gap-6 lg:grid-cols-2">
+                                                    <div className="space-y-3">
+                                                        <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                                            Sections
+                                                        </h3>
+                                                        {gradeLevel.sections.length === 0 ? (
+                                                            <div className="rounded-lg border border-dashed px-4 py-6 text-sm text-muted-foreground">
+                                                                No sections yet. Add sections to manage homerooms or strands.
+                                                            </div>
+                                                        ) : (
+                                                            <div className="divide-y rounded-lg border">
+                                                                {gradeLevel.sections.map((section) => (
+                                                                    <div
+                                                                        key={section.id}
+                                                                        className="flex items-start justify-between gap-4 px-4 py-3"
+                                                                    >
+                                                                        <div>
+                                                                            <p className="font-medium text-foreground">{section.name}</p>
+                                                                            {section.description && (
+                                                                                <p className="text-xs text-muted-foreground">{section.description}</p>
                                                                             )}
+                                                                            <div className="mt-2 flex gap-2 text-xs text-muted-foreground">
+                                                                                <Badge variant={section.is_active ? 'secondary' : 'outline'}>
+                                                                                    {section.is_active ? 'Active' : 'Inactive'}
+                                                                                </Badge>
+                                                                                {section.display_order !== null && (
+                                                                                    <span>Order {section.display_order}</span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex gap-2">
+                                                                            <Button
+                                                                                size="icon"
+                                                                                variant="ghost"
+                                                                                onClick={() =>
+                                                                                    setSectionDialog({
+                                                                                        mode: 'edit',
+                                                                                        gradeLevel,
+                                                                                        section: { ...section, grade_level_id: gradeLevel.id },
+                                                                                    })
+                                                                                }
+                                                                            >
+                                                                                <Pencil className="h-4 w-4" />
+                                                                                <span className="sr-only">Edit section</span>
+                                                                            </Button>
+                                                                            <Button
+                                                                                size="icon"
+                                                                                variant="ghost"
+                                                                                className="text-destructive hover:text-destructive"
+                                                                                onClick={() => handleDeleteSection(gradeLevel, section)}
+                                                                            >
+                                                                                <Trash className="h-4 w-4" />
+                                                                                <span className="sr-only">Delete section</span>
+                                                                            </Button>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="flex gap-2">
-                                                                        <Button
-                                                                            size="icon"
-                                                                            variant="ghost"
-                                                                            onClick={() =>
-                                                                                setSectionDialog({
-                                                                                    mode: 'edit',
-                                                                                    gradeLevel,
-                                                                                    section: { ...section, grade_level_id: gradeLevel.id },
-                                                                                })
-                                                                            }
-                                                                        >
-                                                                            <Pencil className="h-4 w-4" />
-                                                                            <span className="sr-only">Edit section</span>
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="icon"
-                                                                            variant="ghost"
-                                                                            className="text-destructive hover:text-destructive"
-                                                                            onClick={() => handleDeleteSection(gradeLevel, section)}
-                                                                        >
-                                                                            <Trash className="h-4 w-4" />
-                                                                            <span className="sr-only">Delete section</span>
-                                                                        </Button>
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
 
-                                                <div className="space-y-3">
-                                                    <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-                                                        Fee snapshot
-                                                    </h3>
-                                                    {gradeLevel.fees.length === 0 ? (
-                                                        <div className="rounded-lg border border-dashed px-4 py-6 text-sm text-muted-foreground">
-                                                            No fees are assigned for this school year. Visit the fee structure tab to configure
-                                                            amounts.
-                                                        </div>
-                                                    ) : (
-                                                        <div className="grid gap-3">
-                                                            {gradeLevel.fees.map((fee) => (
-                                                                <div
-                                                                    key={fee.id}
-                                                                    className="flex items-center justify-between rounded-lg border px-4 py-3"
-                                                                >
-                                                                    <div>
-                                                                        <p className="font-medium text-foreground">{fee.fee_type}</p>
-                                                                        <div className="mt-1 flex gap-2 text-xs text-muted-foreground">
-                                                                            <Badge variant={fee.is_required ? 'secondary' : 'outline'}>
-                                                                                {fee.is_required ? 'Required' : 'Optional'}
-                                                                            </Badge>
-                                                                            {!fee.is_active && <span>Inactive</span>}
+                                                    <div className="space-y-3">
+                                                        <h3 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                                                            Fee snapshot
+                                                        </h3>
+                                                        {gradeLevel.fees.length === 0 ? (
+                                                            <div className="rounded-lg border border-dashed px-4 py-6 text-sm text-muted-foreground">
+                                                                No fees are assigned for this school year. Visit the fee structure tab to configure
+                                                                amounts.
+                                                            </div>
+                                                        ) : (
+                                                            <div className="grid gap-3">
+                                                                {gradeLevel.fees.map((fee) => (
+                                                                    <div
+                                                                        key={fee.id}
+                                                                        className="flex items-center justify-between rounded-lg border px-4 py-3"
+                                                                    >
+                                                                        <div>
+                                                                            <p className="font-medium text-foreground">{fee.fee_type}</p>
+                                                                            <div className="mt-1 flex gap-2 text-xs text-muted-foreground">
+                                                                                <Badge variant={fee.is_required ? 'secondary' : 'outline'}>
+                                                                                    {fee.is_required ? 'Required' : 'Optional'}
+                                                                                </Badge>
+                                                                                {!fee.is_active && <span>Inactive</span>}
+                                                                            </div>
                                                                         </div>
+                                                                        <span className="font-semibold text-foreground">
+                                                                            {formatCurrency(fee.amount)}
+                                                                        </span>
                                                                     </div>
-                                                                    <span className="font-semibold text-foreground">
-                                                                        {formatCurrency(fee.amount)}
-                                                                    </span>
-                                                                </div>
-                                                            ))}
-                                                            <Button asChild variant="outline">
-                                                                <a href={feeStructureRoutes.index().url}>Open fee structures</a>
-                                                            </Button>
-                                                        </div>
-                                                    )}
+                                                                ))}
+                                                                <Button asChild variant="outline">
+                                                                    <a href={feeStructureRoutes.index().url}>Open fee structures</a>
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                        )}
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
 
                 <GradeLevelDialog state={gradeLevelDialog} close={() => setGradeLevelDialog(null)} />
                 <SectionDialog state={sectionDialog} close={() => setSectionDialog(null)} gradeLevels={gradeLevels} />
-            </AcademicsLayout>
+            </div>
         </AppLayout>
     );
 }
