@@ -1,20 +1,21 @@
-import { ChangeEvent, FormEventHandler, useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, FormEventHandler, useMemo } from 'react';
 
+import { BalanceSummary, FeeCheckbox, FeeSelectionSummary, Stepper, StudentCard } from '@/components/payments/payment-components';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { usePaymentWizard } from '@/hooks/use-payment-wizard';
 import AppLayout from '@/layouts/app-layout';
+import { formatCurrency } from '@/lib/payments';
 import { create as createPayments, index as indexPayments, store as storePayment } from '@/routes/payments';
 import { create as createStudent, show as showStudent } from '@/routes/students';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -75,7 +76,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const steps = [
+const wizardSteps = [
     {
         id: 1,
         title: 'Select student',
@@ -87,61 +88,6 @@ const steps = [
         description: 'Choose fees, confirm totals, and submit.',
     },
 ];
-
-const formatCurrency = (value: number | string | null | undefined): string => {
-    const numeric = typeof value === 'string' ? Number(value) : (value ?? 0);
-
-    if (!Number.isFinite(numeric)) {
-        return '₱0.00';
-    }
-
-    const sign = numeric < 0 ? '-' : '';
-    const absolute = Math.abs(numeric);
-
-    return `${sign}₱${absolute.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    })}`;
-};
-
-const arraysEqual = (a: number[], b: number[]) => a.length === b.length && a.every((value, index) => value === b[index]);
-
-function Stepper({ currentStep }: { currentStep: number }) {
-    return (
-        <div className="space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-                {steps.map((step) => {
-                    const isComplete = currentStep > step.id;
-                    const isActive = currentStep === step.id;
-
-                    return (
-                        <div key={step.id} className="flex items-start gap-3">
-                            <div
-                                className={cn(
-                                    'flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold transition',
-                                    isComplete
-                                        ? 'border-primary bg-primary text-primary-foreground'
-                                        : isActive
-                                          ? 'border-primary text-primary'
-                                          : 'border-border text-muted-foreground',
-                                )}
-                            >
-                                {isComplete ? <CheckCircle2 className="h-5 w-5" /> : step.id}
-                            </div>
-                            <div className="space-y-1">
-                                <p className={cn('text-sm font-medium', isActive || isComplete ? 'text-foreground' : 'text-muted-foreground')}>
-                                    {step.title}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{step.description}</p>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            <Separator />
-        </div>
-    );
-}
 
 export default function CreatePayment() {
     const { student, paymentPurposes, students, search, paymentMethods, gradeLevelFees, auth } = usePage<PaymentCreationProps>().props;
@@ -158,194 +104,48 @@ export default function CreatePayment() {
         notes: '',
     });
 
-    const [selectedStudent, setSelectedStudent] = useState<StudentSummary | null>(student);
-    const [searchQuery, setSearchQuery] = useState(search ?? '');
-    const [step, setStep] = useState<number>(student ? 2 : 1);
-    const [selectedFeeIds, setSelectedFeeIds] = useState<number[]>([]);
-    const [amountManuallyEdited, setAmountManuallyEdited] = useState(false);
-    const [isFetchingStudent, setIsFetchingStudent] = useState(false);
+    // Use the payment wizard hook for complex state management
+    const wizard = usePaymentWizard({
+        initialStudent: student,
+        initialSearch: search,
+        gradeLevelFees,
+    });
 
-    const searchInitializedRef = useRef(false);
-    const lastStudentIdRef = useRef<number | null>(student?.id ?? null);
-
-    useEffect(() => {
-        setSelectedStudent(student);
-        setData('student_id', student?.id ?? null);
-        setStep(student ? 2 : 1);
-    }, [student, setData]);
-
-    useEffect(() => {
-        setSearchQuery(search ?? '');
-    }, [search]);
-
-    useEffect(() => {
-        if (!searchInitializedRef.current) {
-            searchInitializedRef.current = true;
-            return;
+    // Sync form student_id with wizard state
+    useMemo(() => {
+        if (data.student_id !== wizard.selectedStudent?.id) {
+            setData('student_id', wizard.selectedStudent?.id ?? null);
         }
+    }, [wizard.selectedStudent?.id]);
 
-        setIsFetchingStudent(true);
-
-        const timeout = setTimeout(() => {
-            router.get(
-                createPayments({
-                    query: {
-                        search: searchQuery || undefined,
-                        student_id: data.student_id ?? undefined,
-                    },
-                }).url,
-                {},
-                {
-                    preserveScroll: true,
-                    preserveState: true,
-                    replace: true,
-                    only: ['students', 'search', 'student', 'gradeLevelFees'],
-                    onFinish: () => setIsFetchingStudent(false),
-                },
-            );
-        }, 250);
-
-        return () => {
-            clearTimeout(timeout);
-        };
-    }, [searchQuery, data.student_id]);
-
-    useEffect(() => {
-        if (!selectedStudent) {
-            lastStudentIdRef.current = null;
-            setSelectedFeeIds([]);
-            return;
-        }
-
-        const nextFeeIds = gradeLevelFees.map((fee) => fee.id);
-
-        if (lastStudentIdRef.current !== selectedStudent.id) {
-            lastStudentIdRef.current = selectedStudent.id;
-            setSelectedFeeIds(nextFeeIds);
-            setAmountManuallyEdited(false);
-            return;
-        }
-
-        setSelectedFeeIds((current) => {
-            const requiredIds = gradeLevelFees.filter((fee) => fee.is_required).map((fee) => fee.id);
-            const filtered = current.filter((id) => nextFeeIds.includes(id));
-            const mergedSet = new Set([...filtered, ...requiredIds]);
-            const ordered = nextFeeIds.filter((id) => mergedSet.has(id));
-
-            if (arraysEqual(ordered, current)) {
-                return current;
-            }
-
-            return ordered;
-        });
-    }, [selectedStudent, gradeLevelFees]);
-
-    const selectedFees = useMemo(() => gradeLevelFees.filter((fee) => selectedFeeIds.includes(fee.id)), [gradeLevelFees, selectedFeeIds]);
-
-    const calculatedTotal = useMemo(() => selectedFees.reduce((sum, fee) => sum + Number(fee.amount), 0), [selectedFees]);
-
-    const currentAmount = data.amount;
-
-    useEffect(() => {
-        if (!selectedStudent) {
-            if (currentAmount !== '') {
+    // Auto-calculate amount from selected fees (unless manually overridden)
+    useMemo(() => {
+        if (!wizard.selectedStudent) {
+            if (data.amount !== '') {
                 setData('amount', '');
             }
-            setAmountManuallyEdited(false);
+            wizard.setAmountManuallyEdited(false);
             return;
         }
 
-        if (amountManuallyEdited) {
+        if (wizard.amountManuallyEdited) {
             return;
         }
 
-        const nextAmount = calculatedTotal > 0 ? calculatedTotal.toFixed(2) : '';
+        const nextAmount = wizard.calculatedTotal > 0 ? wizard.calculatedTotal.toFixed(2) : '';
 
-        if (currentAmount !== nextAmount) {
+        if (data.amount !== nextAmount) {
             setData('amount', nextAmount);
         }
-    }, [selectedStudent, calculatedTotal, amountManuallyEdited, currentAmount, setData]);
-
-    const handleSelectStudent = (studentOption: StudentSummary) => {
-        if (selectedStudent?.id === studentOption.id) {
-            setStep(2);
-            return;
-        }
-
-        setSelectedStudent(studentOption);
-        setData('student_id', studentOption.id);
-        setIsFetchingStudent(true);
-
-        router.get(
-            createPayments({
-                query: {
-                    student_id: studentOption.id,
-                    search: searchQuery || undefined,
-                },
-            }).url,
-            {},
-            {
-                preserveScroll: true,
-                preserveState: true,
-                replace: true,
-                only: ['student', 'gradeLevelFees', 'students', 'search'],
-                onSuccess: () => setStep(2),
-                onFinish: () => setIsFetchingStudent(false),
-            },
-        );
-    };
-
-    const handleClearStudent = () => {
-        setSelectedStudent(null);
-        setData('student_id', null);
-        setSelectedFeeIds([]);
-        setAmountManuallyEdited(false);
-        setStep(1);
-        setIsFetchingStudent(true);
-
-        router.get(
-            createPayments({
-                query: {
-                    search: searchQuery || undefined,
-                },
-            }).url,
-            {},
-            {
-                preserveScroll: true,
-                preserveState: true,
-                replace: true,
-                only: ['student', 'gradeLevelFees', 'students', 'search'],
-                onFinish: () => setIsFetchingStudent(false),
-            },
-        );
-    };
-
-    const toggleFee = (feeId: number, isRequired: boolean, nextState: boolean) => {
-        if (isRequired) {
-            return;
-        }
-
-        setSelectedFeeIds((current) => {
-            if (nextState) {
-                if (current.includes(feeId)) {
-                    return current;
-                }
-
-                const merged = [...current, feeId];
-                return gradeLevelFees.filter((fee) => merged.includes(fee.id)).map((fee) => fee.id);
-            }
-
-            return current.filter((id) => id !== feeId);
-        });
-    };
+    }, [wizard.selectedStudent, wizard.calculatedTotal, wizard.amountManuallyEdited, data.amount]);
 
     const handleAmountInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setAmountManuallyEdited(true);
+        wizard.setAmountManuallyEdited(true);
         setData('amount', event.target.value);
     };
 
     const handleApplyCalculatedTotal = () => {
-        setAmountManuallyEdited(false);
+        wizard.resetToCalculatedTotal();
     };
 
     const submit: FormEventHandler<HTMLFormElement> = (event) => {
@@ -354,7 +154,7 @@ export default function CreatePayment() {
         post(storePayment().url, {
             onSuccess: () => {
                 reset('amount', 'notes');
-                setAmountManuallyEdited(false);
+                wizard.setAmountManuallyEdited(false);
             },
         });
     };
@@ -362,19 +162,8 @@ export default function CreatePayment() {
     const parsedAmount = Number(data.amount);
     const isSubmitDisabled = !data.student_id || !data.amount || Number.isNaN(parsedAmount) || parsedAmount <= 0 || processing;
 
-    const outstandingBalance = selectedStudent?.balance ?? 0;
-    const expectedFees = selectedStudent?.expected_fees ?? 0;
-    const totalPaid = selectedStudent?.total_paid ?? 0;
-
-    const balanceTone =
-        outstandingBalance > 0
-            ? 'text-red-600 dark:text-red-400'
-            : outstandingBalance < 0
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-slate-600 dark:text-slate-300';
-
     const canCreatePayments = auth?.user?.can?.createPayments ?? false;
-    const showManualOverrideBadge = amountManuallyEdited && data.amount !== '';
+    const showManualOverrideBadge = wizard.amountManuallyEdited && data.amount !== '';
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -390,19 +179,19 @@ export default function CreatePayment() {
                                     <CardDescription>Guided flow for accurate receipts and faster checkout.</CardDescription>
                                 </div>
 
-                                {canCreatePayments && selectedStudent && (
+                                {canCreatePayments && wizard.selectedStudent && (
                                     <Button asChild variant="outline">
-                                        <Link href={showStudent({ student: selectedStudent.id }).url}>View student</Link>
+                                        <Link href={showStudent({ student: wizard.selectedStudent.id }).url}>View student</Link>
                                     </Button>
                                 )}
                             </div>
 
-                            <Stepper currentStep={step} />
+                            <Stepper currentStep={wizard.step} steps={wizardSteps} />
                         </div>
                     </CardHeader>
 
                     <CardContent className="space-y-8">
-                        {step === 1 && (
+                        {wizard.step === 1 && (
                             <div className="grid gap-6 lg:grid-cols-[1.3fr,2fr]">
                                 <Card className="border-border/60">
                                     <CardHeader>
@@ -410,41 +199,14 @@ export default function CreatePayment() {
                                         <CardDescription>Pick a student to move on to the payment step.</CardDescription>
                                     </CardHeader>
                                     <CardContent className="grid gap-4">
-                                        {selectedStudent ? (
-                                            <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-muted/40 p-4">
-                                                <div className="flex items-start justify-between gap-4">
-                                                    <div>
-                                                        <p className="text-base font-semibold text-foreground">{selectedStudent.full_name}</p>
-                                                        <p className="text-sm text-muted-foreground">{selectedStudent.student_number}</p>
-                                                    </div>
-                                                    <Badge variant="secondary">{selectedStudent.grade_level ?? 'Unassigned'}</Badge>
-                                                </div>
-
-                                                <div className="grid gap-3 rounded-lg border border-border/40 bg-card/60 p-3 text-sm">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-muted-foreground">Balance</span>
-                                                        <span className={cn('font-semibold', balanceTone)}>{formatCurrency(outstandingBalance)}</span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                                        <span>Expected fees</span>
-                                                        <span className="font-medium text-foreground">{formatCurrency(expectedFees)}</span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                                        <span>Total paid</span>
-                                                        <span className="font-medium text-foreground">{formatCurrency(totalPaid)}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                                    <Button type="button" variant="ghost" onClick={handleClearStudent}>
-                                                        Clear selection
-                                                    </Button>
-                                                    <Button type="button" onClick={() => setStep(2)}>
-                                                        Continue to payment
-                                                        <ArrowRight className="ml-2 h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
+                                        {wizard.selectedStudent ? (
+                                            <StudentCard
+                                                student={wizard.selectedStudent}
+                                                variant="detailed"
+                                                showBalance={true}
+                                                onClear={wizard.handleClearStudent}
+                                                onContinue={() => wizard.setStep(2)}
+                                            />
                                         ) : (
                                             <div className="rounded-lg border border-dashed border-border/60 bg-muted/30 p-6 text-center text-sm text-muted-foreground">
                                                 No student selected yet. Search the list to get started.
@@ -460,7 +222,7 @@ export default function CreatePayment() {
                                                 <CardTitle>Find a student</CardTitle>
                                                 <CardDescription>Search by name, ID, or partial keywords.</CardDescription>
                                             </div>
-                                            {isFetchingStudent && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                                            {wizard.isFetchingStudent && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                                         </div>
                                     </CardHeader>
                                     <CardContent className="grid gap-4">
@@ -468,8 +230,8 @@ export default function CreatePayment() {
                                             <Label htmlFor="student-search">Search</Label>
                                             <Input
                                                 id="student-search"
-                                                value={searchQuery}
-                                                onChange={(event) => setSearchQuery(event.target.value)}
+                                                value={wizard.searchQuery}
+                                                onChange={(event) => wizard.setSearchQuery(event.target.value)}
                                                 placeholder="e.g. Juan Dela Cruz or STU-2025-0001"
                                                 autoComplete="off"
                                             />
@@ -483,13 +245,13 @@ export default function CreatePayment() {
                                             )}
 
                                             {students.map((studentOption) => {
-                                                const isActive = selectedStudent?.id === studentOption.id;
+                                                const isActive = wizard.selectedStudent?.id === studentOption.id;
 
                                                 return (
                                                     <button
                                                         key={studentOption.id}
                                                         type="button"
-                                                        onClick={() => handleSelectStudent(studentOption)}
+                                                        onClick={() => wizard.handleSelectStudent(studentOption)}
                                                         className={cn(
                                                             'flex flex-col rounded-lg border border-border/40 bg-card/60 px-4 py-3 text-left transition hover:border-primary/40 hover:bg-primary/5',
                                                             isActive && 'border-primary bg-primary/10 shadow-sm',
@@ -522,8 +284,8 @@ export default function CreatePayment() {
                                                 type="button"
                                                 variant="outline"
                                                 size="sm"
-                                                onClick={() => setStep(2)}
-                                                disabled={!selectedStudent || isFetchingStudent}
+                                                onClick={() => wizard.setStep(2)}
+                                                disabled={!wizard.selectedStudent || wizard.isFetchingStudent}
                                             >
                                                 Continue
                                                 <ArrowRight className="ml-2 h-3 w-3" />
@@ -534,7 +296,7 @@ export default function CreatePayment() {
                             </div>
                         )}
 
-                        {step === 2 && selectedStudent && (
+                        {wizard.step === 2 && wizard.selectedStudent && (
                             <div className="grid gap-6 lg:grid-cols-[1.3fr,2fr]">
                                 <div className="grid gap-6">
                                     <Card className="border-border/60">
@@ -545,34 +307,25 @@ export default function CreatePayment() {
                                         <CardContent className="grid gap-4">
                                             <div className="flex items-start justify-between gap-4">
                                                 <div>
-                                                    <p className="text-base font-semibold text-foreground">{selectedStudent.full_name}</p>
-                                                    <p className="text-sm text-muted-foreground">{selectedStudent.student_number}</p>
-                                                    <p className="text-xs text-muted-foreground">Section {selectedStudent.section ?? '—'}</p>
+                                                    <p className="text-base font-semibold text-foreground">{wizard.selectedStudent.full_name}</p>
+                                                    <p className="text-sm text-muted-foreground">{wizard.selectedStudent.student_number}</p>
+                                                    <p className="text-xs text-muted-foreground">Section {wizard.selectedStudent.section ?? '—'}</p>
                                                 </div>
-                                                <Badge variant="secondary">{selectedStudent.grade_level ?? 'Unassigned'}</Badge>
+                                                <Badge variant="secondary">{wizard.selectedStudent.grade_level ?? 'Unassigned'}</Badge>
                                             </div>
 
-                                            <div className="grid gap-3 rounded-lg border border-border/40 bg-muted/30 p-4 text-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-muted-foreground">Outstanding balance</span>
-                                                    <span className={cn('font-semibold', balanceTone)}>{formatCurrency(outstandingBalance)}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                                    <span>Total expected this year</span>
-                                                    <span className="font-medium text-foreground">{formatCurrency(expectedFees)}</span>
-                                                </div>
-                                                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                                    <span>Total paid so far</span>
-                                                    <span className="font-medium text-foreground">{formatCurrency(totalPaid)}</span>
-                                                </div>
-                                            </div>
+                                            <BalanceSummary
+                                                outstandingBalance={wizard.selectedStudent.balance}
+                                                expectedFees={wizard.selectedStudent.expected_fees}
+                                                totalPaid={wizard.selectedStudent.total_paid}
+                                            />
 
                                             <div className="flex flex-wrap gap-3">
-                                                <Button type="button" variant="ghost" onClick={() => setStep(1)}>
+                                                <Button type="button" variant="ghost" onClick={() => wizard.setStep(1)}>
                                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                                     Change student
                                                 </Button>
-                                                <Button type="button" variant="outline" onClick={handleClearStudent}>
+                                                <Button type="button" variant="outline" onClick={wizard.handleClearStudent}>
                                                     Clear selection
                                                 </Button>
                                             </div>
@@ -593,67 +346,18 @@ export default function CreatePayment() {
                                                 </div>
                                             ) : (
                                                 <div className="space-y-3">
-                                                    {gradeLevelFees.map((fee) => {
-                                                        const isSelected = selectedFeeIds.includes(fee.id);
-
-                                                        return (
-                                                            <label
-                                                                key={fee.id}
-                                                                className={cn(
-                                                                    'flex items-start gap-3 rounded-lg border border-border/40 bg-card/60 p-4 transition hover:border-primary/40 hover:bg-primary/5',
-                                                                    isSelected && 'border-primary bg-primary/10',
-                                                                )}
-                                                            >
-                                                                <Checkbox
-                                                                    checked={isSelected}
-                                                                    disabled={fee.is_required}
-                                                                    onCheckedChange={(checked) =>
-                                                                        toggleFee(fee.id, fee.is_required, Boolean(checked))
-                                                                    }
-                                                                    className="mt-1"
-                                                                />
-                                                                <div className="flex-1 space-y-1">
-                                                                    <div className="flex items-start justify-between gap-3">
-                                                                        <p className="text-sm font-medium text-foreground">{fee.fee_type}</p>
-                                                                        <span className="text-sm font-semibold text-foreground">
-                                                                            {formatCurrency(fee.amount)}
-                                                                        </span>
-                                                                    </div>
-                                                                    {fee.description && (
-                                                                        <p className="text-xs text-muted-foreground">{fee.description}</p>
-                                                                    )}
-                                                                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                                                                        <Badge variant={fee.is_required ? 'secondary' : 'outline'}>
-                                                                            {fee.is_required ? 'Required' : 'Optional'}
-                                                                        </Badge>
-                                                                        {fee.school_year && <Badge variant="outline">SY {fee.school_year}</Badge>}
-                                                                    </div>
-                                                                </div>
-                                                            </label>
-                                                        );
-                                                    })}
+                                                    {gradeLevelFees.map((fee) => (
+                                                        <FeeCheckbox
+                                                            key={fee.id}
+                                                            fee={fee}
+                                                            checked={wizard.selectedFeeIds.includes(fee.id)}
+                                                            onCheckedChange={(checked) => wizard.toggleFee(fee.id, fee.is_required, Boolean(checked))}
+                                                        />
+                                                    ))}
                                                 </div>
                                             )}
 
-                                            <div className="rounded-lg border border-border/50 bg-muted/30 p-4 text-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-muted-foreground">Selected fees ({selectedFees.length})</span>
-                                                    <span className="font-semibold text-foreground">{formatCurrency(calculatedTotal)}</span>
-                                                </div>
-                                                {selectedFees.length > 0 ? (
-                                                    <div className="mt-3 flex flex-wrap gap-2">
-                                                        {selectedFees.map((fee) => (
-                                                            <Badge key={fee.id} variant="outline">
-                                                                {fee.fee_type}
-                                                            </Badge>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <p className="mt-2 text-xs text-muted-foreground">
-                                                        No fees selected. You can still record a payment by entering a custom amount.
-                                                    </p>
-                                                )}
-                                            </div>
+                                            <FeeSelectionSummary selectedFees={wizard.selectedFees} totalAmount={wizard.calculatedTotal} />
                                         </CardContent>
                                     </Card>
                                 </div>
@@ -668,7 +372,7 @@ export default function CreatePayment() {
                                             <div className="text-right text-xs text-muted-foreground">
                                                 <p>Balance after payment</p>
                                                 <p className="font-medium text-foreground">
-                                                    {formatCurrency(outstandingBalance - (Number(data.amount) || 0))}
+                                                    {formatCurrency(wizard.selectedStudent.balance - (Number(data.amount) || 0))}
                                                 </p>
                                             </div>
                                         </div>
@@ -707,9 +411,9 @@ export default function CreatePayment() {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={handleApplyCalculatedTotal}
-                                                    disabled={calculatedTotal <= 0}
+                                                    disabled={wizard.calculatedTotal <= 0}
                                                 >
-                                                    Reset to {formatCurrency(calculatedTotal)}
+                                                    Reset to {formatCurrency(wizard.calculatedTotal)}
                                                 </Button>
                                             </div>
                                         </div>
@@ -791,7 +495,7 @@ export default function CreatePayment() {
 
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex flex-wrap gap-3">
-                                            <Button type="button" variant="ghost" onClick={() => setStep(1)}>
+                                            <Button type="button" variant="ghost" onClick={() => wizard.setStep(1)}>
                                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                                 Back to student list
                                             </Button>
