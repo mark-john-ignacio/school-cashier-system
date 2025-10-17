@@ -25,6 +25,9 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Debug Wayfinder
+        run: php artisan wayfinder:generate --with-form
+
       - name: Install Node dependencies
         run: npm ci
 
