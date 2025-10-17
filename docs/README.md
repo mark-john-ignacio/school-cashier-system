@@ -1,16 +1,10 @@
 # School Cashier System Documentation# Website
 
-
-
 This directory contains the complete documentation for the School Cashier System, built with [Docusaurus](https://docusaurus.io/).This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
-
-
 
 ## 📚 Documentation Structure## Installation
 
-
-
-``````bash
+`````bash
 
 docs/yarn
 
@@ -277,3 +271,4 @@ Docusaurus will warn about broken links during the build process.
 ---
 
 For questions or issues, please refer to the main project documentation or create an issue in the repository.
+`````

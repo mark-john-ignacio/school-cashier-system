@@ -32,7 +32,7 @@ Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new
 
 - **Payment Processing** - Support for multiple payment methods (cash, bank transfer, check, etc.)- [Node.js](https://nodejs.org/en/download/) version 20.0 or above:
 
-- **Receipt Generation** - Automatic official receipt generation with unique numbering  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+- **Receipt Generation** - Automatic official receipt generation with unique numbering - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
 
 - **Financial Reports** - Real-time analytics, trends, and collection summaries
 
@@ -66,11 +66,7 @@ The system follows a modern, type-safe architecture:npm init docusaurus@latest m
 
 - **Database**: SQLite (development) / MySQL (production)## Start your site
 
-
-
 ## 📚 Documentation StructureRun the development server:
-
-
 
 Our documentation is organized into several sections:```bash
 
@@ -79,8 +75,6 @@ cd my-website
 ### 🏛️ Architecturenpm run start
 
 Learn about the system architecture, design patterns, and technical decisions.```
-
-
 
 ### 👨‍💻 Developer GuideThe `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
 
@@ -92,11 +86,12 @@ The `npm run start` command builds your website locally and serves it through a 
 
 Track project progress, roadmaps, and implementation details.Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
 
-
 ### 🔄 Workflow
+
 Understand system workflows, payment processing, and operational procedures.
 
 ### 🎨 Features
+
 Explore specific features, enhancements, and how they work.
 
 ## 🚀 Quick Start

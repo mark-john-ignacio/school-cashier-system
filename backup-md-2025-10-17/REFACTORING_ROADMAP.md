@@ -335,7 +335,7 @@ Set up frontend testing:
 npm install -D @testing-library/react @testing-library/jest-dom vitest jsdom
 ```
 
-2\. **Create test setup**:
+2. **Create test setup**:
 
 ```typescript
 // vitest.config.ts
@@ -349,7 +349,7 @@ export default defineConfig({
 });
 ```
 
-3\. **Write component tests**:
+3. **Write component tests**:
 
 ```typescript
 // resources/js/components/payments/__tests__/student-card.test.tsx
@@ -373,7 +373,7 @@ describe('StudentCard', () => {
 });
 ```
 
-4\. **Write utility tests**:
+4. **Write utility tests**:
 
 ```typescript
 // resources/js/lib/__tests__/payments.test.ts
@@ -419,13 +419,13 @@ describe('validatePaymentAmount', () => {
 
 Track these metrics to gauge improvement:
 
-| Metric                   | Before     | Target            | Current |
-| ------------------------ | ---------- | ----------------- | ------- |
-| Avg component size       | 500+ lines | &lt;300 lines     | -       |
-| Test coverage            | 0%         | 60%+              | 0%      |
-| Type errors              | 3          | 0                 | 3       |
-| Duplicate code instances | Many       | &lt;3 per pattern | -       |
-| Onboarding time          | 2 weeks    | 1 week            | -       |
+| Metric                   | Before     | Target         | Current |
+| ------------------------ | ---------- | -------------- | ------- |
+| Avg component size       | 500+ lines | <300 lines     | -       |
+| Test coverage            | 0%         | 60%+           | 0%      |
+| Type errors              | 3          | 0              | 3       |
+| Duplicate code instances | Many       | <3 per pattern | -       |
+| Onboarding time          | 2 weeks    | 1 week         | -       |
 
 ## Questions?
 
