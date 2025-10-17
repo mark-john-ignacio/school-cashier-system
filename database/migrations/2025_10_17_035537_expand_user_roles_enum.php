@@ -16,9 +16,9 @@ return new class extends Migration {
 
         $allowedRoles = ['admin', 'cashier', 'manager', 'accountant'];
 
-        $this->dropExistingCheckConstraint();
-        $this->coerceInvalidRoles($allowedRoles, 'cashier');
-        $this->addCheckConstraint($allowedRoles);
+    $this->dropExistingCheckConstraint();
+    $this->coerceInvalidRoles($allowedRoles, 'cashier');
+    $this->addCheckConstraint($allowedRoles);
     }
 
     /**
@@ -39,6 +39,10 @@ return new class extends Migration {
 
     private function dropExistingCheckConstraint(): void
     {
+        if ($this->usingSqlite()) {
+            return;
+        }
+
         DB::statement('ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check');
     }
 
@@ -55,12 +59,21 @@ return new class extends Migration {
 
     private function addCheckConstraint(array $allowedRoles): void
     {
+        if ($this->usingSqlite()) {
+            return;
+        }
+
         DB::statement(
             sprintf(
                 'ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN (%s))',
                 $this->quoteList($allowedRoles)
             )
         );
+    }
+
+    private function usingSqlite(): bool
+    {
+        return Schema::getConnection()->getDriverName() === 'sqlite';
     }
 
     private function usersRoleColumnExists(): bool
