@@ -2,6 +2,7 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { APP } from '@/lib/constants';
 import { dashboard } from '@/routes';
 import feeStructureRoutes from '@/routes/academics/fee-structures';
 import gradeLevelRoutes from '@/routes/academics/grade-levels';
@@ -13,19 +14,47 @@ import { CreditCard, Folder, GraduationCap, LayoutGrid, Receipt, Users } from 'l
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 
+/**
+ * Footer navigation items
+ *
+ * Links shown at the bottom of the sidebar.
+ */
 const footerNavItems: NavItem[] = [
     {
         title: 'GitHub',
-        href: 'https://github.com/mark-john-ignacio/school-cashier-system',
+        href: APP.GITHUB_URL,
         icon: Folder,
     },
 ];
 
+/**
+ * Application Sidebar Component
+ *
+ * Main navigation sidebar with role-based menu items.
+ *
+ * Features:
+ * - Collapsible design with icon-only mode
+ * - Role-based access control (admin-only sections)
+ * - User profile menu at bottom
+ * - GitHub link in footer
+ *
+ * @remarks
+ * Navigation items are generated dynamically based on user role.
+ * Admin users see additional "Academics" section with grade levels and fee structures.
+ *
+ * @component
+ */
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     const isAdmin = auth?.user?.role === 'admin';
 
+    /**
+     * Generate navigation groups based on user role
+     *
+     * Memoized to prevent unnecessary recalculation on re-renders.
+     */
     const mainNavGroups = useMemo<NavGroup[]>(() => {
+        // Core platform navigation (available to all users)
         const platformItems: NavItem[] = [
             {
                 title: 'Dashboard',
@@ -51,6 +80,7 @@ export function AppSidebar() {
             },
         ];
 
+        // Admin-only: Academic management section
         if (isAdmin) {
             groups.push({
                 title: 'Academics',

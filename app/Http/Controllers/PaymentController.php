@@ -17,7 +17,30 @@ class PaymentController extends Controller
     ];
 
     /**
-     * Display a listing of the resource.
+     * Display a paginated listing of payments with filtering and search.
+     *
+     * Supports advanced filtering by student name, receipt number, date range,
+     * payment purpose, cashier, and payment method. Results are paginated with
+     * configurable items per page.
+     *
+     * @param Request $request The incoming HTTP request with query parameters
+     *
+     * Query Parameters:
+     * - search: Student name or receipt number
+     * - date_from: Start date for date range filter (Y-m-d)
+     * - date_to: End date for date range filter (Y-m-d)
+     * - purpose: Payment purpose to filter by
+     * - cashier_id: Cashier user ID to filter by
+     * - payment_method: Payment method (cash, check, online)
+     * - per_page: Items per page (10, 15, 25, 50) - defaults to 15
+     * - sort_field: Field to sort by - defaults to 'payment_date'
+     * - sort_direction: Sort direction (asc, desc) - defaults to 'desc'
+     *
+     * @return \Inertia\Response Inertia response rendering 'payments/index' page
+     *
+     * @see Payment::search() for student search implementation
+     * @see Payment::dateRange() for date range filtering
+     * @see Payment::purpose() for purpose filtering
      */
     public function index(Request $request)
     {
@@ -140,7 +163,26 @@ class PaymentController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new payment.
+     *
+     * Renders the payment creation wizard with optional student pre-selection.
+     * When a student_id is provided, loads the student's grade level fee structures
+     * to enable quick fee selection.
+     *
+     * @param Request $request The incoming HTTP request
+     *
+     * Query Parameters:
+     * - student_id: Optional student ID to pre-select in the wizard
+     *
+     * @return \Inertia\Response Inertia response rendering 'payments/create' page
+     *
+     * Props returned:
+     * - student: Pre-selected student with grade level and section (if student_id provided)
+     * - gradeLevelFees: Active fee structures for the student's grade level
+     * - paymentMethods: Available payment method options
+     *
+     * @see Student::gradeLevel() for grade level relationship
+     * @see FeeStructure for fee structure data
      */
     public function create(Request $request)
     {
@@ -236,7 +278,25 @@ class PaymentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created payment record in the database.
+     *
+     * Validates the payment data, creates a new payment record with an auto-generated
+     * receipt number, and associates it with the authenticated cashier.
+     *
+     * @param Request $request The incoming HTTP request with payment data
+     *
+     * Validated Fields:
+     * - student_id: Required, must exist in students table
+     * - amount: Required, numeric, minimum 0.01
+     * - payment_date: Required, valid date
+     * - payment_purpose: Required, string, max 255 characters
+     * - payment_method: Optional, must be 'cash', 'check', or 'online' (defaults to 'cash')
+     * - notes: Optional, string
+     *
+     * @return \Illuminate\Http\RedirectResponse Redirects to payment detail page
+     *
+     * @see Payment::generateReceiptNumber() for receipt number generation
+     * @see Payment::$fillable for fillable attributes
      */
     public function store(Request $request)
     {
@@ -260,7 +320,22 @@ class PaymentController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the detailed information for a specific payment.
+     *
+     * Loads the payment with related student, grade level, section, and cashier data.
+     * Renders the payment receipt view with all transaction details.
+     *
+     * @param Payment $payment The payment model instance (route model binding)
+     *
+     * @return \Inertia\Response Inertia response rendering 'payments/show' page
+     *
+     * Props returned:
+     * - payment: Complete payment details including receipt number, amount, date, method
+     * - payment.student: Student information with grade level and section
+     * - payment.cashier: Cashier (user) who processed the payment
+     *
+     * @see Payment::student() for student relationship
+     * @see Payment::user() for cashier relationship
      */
     public function show(Payment $payment)
     {

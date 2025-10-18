@@ -1,3 +1,5 @@
+![School Cashier System](screenshots/banner.png)
+
 # 🏫 School Cashier System
 
 A modern, full-featured school payment management system built with Laravel 12, Inertia.js, React 19, and TypeScript. Designed for efficient handling of student fee structures, payment processing, and financial reporting with role-based access control.
@@ -161,7 +163,36 @@ After seeding, you can log in with these accounts:
 
 ---
 
-## 📖 Documentation
+## � Code Quality
+
+This project emphasizes clean, maintainable code with comprehensive documentation:
+
+### Type Safety
+- **Typed Routes** - Auto-generated TypeScript helpers via Laravel Wayfinder
+- **Strict TypeScript** - Full type coverage with no `any` types in business logic
+- **Form Type Safety** - Strongly typed Inertia form helpers for all endpoints
+
+### Documentation
+- **PHPDoc Comments** - Comprehensive documentation for all models and controllers
+- **JSDoc Comments** - Detailed component and function documentation
+- **Inline Explanations** - Complex logic explained with inline comments
+- **Usage Examples** - Code examples in documentation for common patterns
+
+### Best Practices
+- **Centralized Constants** - Shared values defined in typed constant files
+- **DRY Principles** - Reusable components and utility functions
+- **SOLID Principles** - Clean architecture with single responsibility
+- **Consistent Naming** - Clear, self-documenting variable and function names
+
+### Developer Experience
+- **Comprehensive README** - Quick start, features, and deployment guides
+- **Contributing Guidelines** - Clear standards for code contributions
+- **Security Policy** - Vulnerability reporting and security best practices
+- **Development Guide** - Architecture patterns and common workflows
+
+---
+
+## �📖 Documentation
 
 Comprehensive documentation is available via Docusaurus:
 
@@ -321,8 +352,16 @@ If you discover any security-related issues, please email **your-email@example.c
 
 ## 📸 Screenshots
 
+### Dashboard
+
 ![Dashboard View](/screenshots/dashboard-view.png)
+
+### Payment Processing
+
 ![Payment Processing](/screenshots/payment-processing.png)
+
+### Student Management
+
 ![Student Management](/screenshots/student-management.png)
 
 ---

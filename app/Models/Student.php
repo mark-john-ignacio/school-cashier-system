@@ -94,7 +94,12 @@ class Student extends Model
     }
 
     /**
-     * Get expected fees for student's grade level
+     * Calculate the total expected fees for the student.
+     * 
+     * Aggregates all active fee structures assigned to the student's grade level.
+     * Returns 0 if the student is not assigned to a grade level.
+     * 
+     * @return float Total expected fees in PHP
      */
     public function getExpectedFeesAttribute(): float
     {
@@ -108,7 +113,21 @@ class Student extends Model
     }
 
     /**
-     * Get current balance (negative means overpaid)
+     * Calculate the current balance for the student.
+     * 
+     * Balance Calculation:
+     * - Positive balance = Amount still owed by the student
+     * - Zero balance = Fully paid
+     * - Negative balance = Overpayment (student paid more than expected)
+     * 
+     * Formula: Balance = Expected Fees - Total Paid
+     * 
+     * @return float Current balance in PHP
+     * 
+     * @example
+     * Expected fees: ₱10,000, Total paid: ₱7,000  → Balance: ₱3,000 (owes)
+     * Expected fees: ₱10,000, Total paid: ₱10,000 → Balance: ₱0 (fully paid)
+     * Expected fees: ₱10,000, Total paid: ₱12,000 → Balance: -₱2,000 (overpaid)
      */
     public function getBalanceAttribute(): float
     {
@@ -116,7 +135,15 @@ class Student extends Model
     }
 
     /**
-     * Get payment status
+     * Determine the payment status based on balance.
+     * 
+     * Status Logic:
+     * - "overpaid": Balance is negative (paid more than expected)
+     * - "paid": Balance is zero or very close to zero
+     * - "partial": Has made some payments but still owes
+     * - "outstanding": No payments made yet
+     * 
+     * @return string Payment status label
      */
     public function getPaymentStatusAttribute(): string
     {
@@ -134,7 +161,10 @@ class Student extends Model
     }
 
     /**
-     * Scope a query to only include active students
+     * Scope a query to only include active students.
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive($query)
     {
@@ -142,7 +172,11 @@ class Student extends Model
     }
 
     /**
-     * Scope a query to filter by grade level
+     * Scope a query to filter by grade level.
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int|string $gradeLevel Grade level ID or name
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeGradeLevel($query, $gradeLevel)
     {

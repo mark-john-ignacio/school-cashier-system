@@ -19,6 +19,9 @@ import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Student summary for payment processing
+ */
 interface StudentSummary {
     id: number;
     student_number: string;
@@ -31,6 +34,9 @@ interface StudentSummary {
     expected_fees?: number;
 }
 
+/**
+ * Fee structure option for grade-level specific fees
+ */
 interface FeeStructureOption {
     id: number;
     fee_type: string;
@@ -40,6 +46,9 @@ interface FeeStructureOption {
     school_year?: string | null;
 }
 
+/**
+ * Props passed from the PaymentController
+ */
 interface PaymentCreationProps extends Record<string, unknown> {
     student: StudentSummary | null;
     paymentPurposes: string[];
@@ -56,6 +65,9 @@ interface PaymentCreationProps extends Record<string, unknown> {
     };
 }
 
+/**
+ * Payment form data structure
+ */
 interface PaymentFormData {
     student_id: number | null;
     amount: string;
@@ -89,12 +101,52 @@ const wizardSteps = [
     },
 ];
 
+/**
+ * Payment Creation Wizard
+ * 
+ * A multi-step form for recording student payments with the following features:
+ * 
+ * **Step 1: Student Selection**
+ * - Search for students by name or student number
+ * - Display student information with current balance
+ * - Shows balance status (Paid, Partially Paid, Outstanding, Overpaid)
+ * 
+ * **Step 2: Payment Details**
+ * - Select from grade-level specific fee structures
+ * - Choose payment method (Cash, Check, Online)
+ * - Set payment date (defaults to today)
+ * - Add optional notes
+ * - Real-time balance calculation
+ * 
+ * **Key Features:**
+ * - Type-safe routing with Wayfinder
+ * - Server-side validation via Inertia forms
+ * - Automatic receipt number generation
+ * - Fee selection based on student's grade level
+ * - Balance updates in real-time
+ * 
+ * @component
+ * 
+ * @example
+ * // Navigate to payment creation
+ * router.visit(createPayments())
+ * 
+ * // With pre-selected student
+ * router.visit(createPayments({ student: 123 }))
+ * 
+ * @remarks
+ * Uses the usePaymentWizard custom hook for step management and state.
+ * Form submission is handled by Inertia.js for automatic CSRF protection
+ * and server-side validation.
+ */
 export default function CreatePayment() {
     const { student, paymentPurposes, students, search, paymentMethods, gradeLevelFees, auth } = usePage<PaymentCreationProps>().props;
 
+    // Default to today's date for payment
     const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
     const defaultMethod = (paymentMethods[0]?.value ?? 'cash') as PaymentFormData['payment_method'];
 
+    // Initialize Inertia form with default values
     const { data, setData, post, processing, errors, reset } = useForm<PaymentFormData>({
         student_id: student?.id ?? null,
         amount: '',
@@ -104,14 +156,14 @@ export default function CreatePayment() {
         notes: '',
     });
 
-    // Use the payment wizard hook for complex state management
+    // Use custom payment wizard hook for step management and fee selection
     const wizard = usePaymentWizard({
         initialStudent: student,
         initialSearch: search,
         gradeLevelFees,
     });
 
-    // Sync form student_id with wizard state
+    // Sync form student_id with wizard state when student changes
     useMemo(() => {
         if (data.student_id !== wizard.selectedStudent?.id) {
             setData('student_id', wizard.selectedStudent?.id ?? null);

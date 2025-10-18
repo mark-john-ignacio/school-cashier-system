@@ -7,6 +7,38 @@ import { Head } from '@inertiajs/react';
 import { BanknoteIcon, CreditCardIcon, TrendingUpIcon, UsersIcon } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts';
 
+/**
+ * Dashboard Page
+ *
+ * Displays comprehensive analytics and insights for the school cashier system.
+ * Shows real-time statistics, trends, and visualizations of payments, students,
+ * and financial data.
+ *
+ * @component
+ *
+ * @features
+ * - Real-time statistics (students, daily/monthly/yearly payments)
+ * - 7-day payment trend with area chart
+ * - Monthly payment trend with bar chart
+ * - Payment method distribution (pie chart)
+ * - Payment purpose breakdown (pie chart)
+ * - Recent payment transactions table
+ * - Role-based access control (all authenticated users)
+ *
+ * @remarks
+ * - All monetary values formatted as Philippine Peso (PHP)
+ * - Charts use responsive Recharts library with custom theme colors
+ * - Statistics calculated server-side in DashboardController
+ * - Data automatically refreshed on navigation
+ *
+ * @example
+ * // Accessed via root route
+ * router.visit(dashboard())
+ *
+ * @see {@link AppLayout} for shared layout structure
+ * @see {@link DashboardController} for statistics calculation
+ */
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -14,6 +46,25 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+/**
+ * Props for the Dashboard component
+ *
+ * @interface DashboardProps
+ * @property {Object} statistics - Aggregated statistics and analytics data
+ * @property {Object} statistics.students - Student enrollment counts
+ * @property {number} statistics.students.total - Total number of students
+ * @property {number} statistics.students.active - Number of active students
+ * @property {Object} statistics.payments - Payment financial data
+ * @property {number} statistics.payments.today - Total amount collected today
+ * @property {number} statistics.payments.todayCount - Number of payments today
+ * @property {number} statistics.payments.monthly - Total amount collected this month
+ * @property {number} statistics.payments.yearly - Total amount collected this year
+ * @property {Array} statistics.last7Days - Daily payment data for the last 7 days
+ * @property {Array} statistics.monthlyTrend - Monthly payment data for trend analysis
+ * @property {Array} statistics.paymentMethods - Distribution of payment methods used
+ * @property {Array} statistics.paymentPurposes - Distribution of payment purposes
+ * @property {Array} statistics.recentPayments - Latest payment transactions
+ */
 interface DashboardProps {
     statistics: {
         students: {
