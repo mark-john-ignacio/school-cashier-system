@@ -27,27 +27,21 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
 # ==============================================================================
-# Stage 2: Frontend Build (Node.js with PHP for Wayfinder)
+# Stage 2: Frontend Build (Node.js with minimal PHP for Wayfinder)
 # ==============================================================================
 FROM php:8.2-cli-alpine AS frontend
 
 WORKDIR /app
 
-# Install Node.js and PHP extensions needed for Laravel/Wayfinder
+# Install Node.js and minimal PHP extensions (only what Wayfinder needs)
 RUN apk add --no-cache \
     nodejs \
     npm \
     libzip-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    icu-dev \
     sqlite-dev \
     && docker-php-ext-install \
     pdo_sqlite \
-    mbstring \
-    xml \
-    zip \
-    intl
+    zip
 
 # Copy package files
 COPY package*.json ./
