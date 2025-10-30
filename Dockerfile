@@ -2,30 +2,9 @@
 # Optimized for Dokku deployment with PHP 8.2, Node.js 20, and Nginx
 
 # ==============================================================================
-# Stage 1: Frontend Build (Node.js)
+# Stage 1: PHP Dependencies First (needed for Wayfinder)
 # ==============================================================================
-FROM node:20-alpine AS frontend
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production=false
-
-# Copy frontend source
-COPY resources ./resources
-COPY public ./public
-COPY vite.config.ts tsconfig.json components.json ./
-
-# Build assets (CSR + SSR)
-RUN npm run build && npm run build:ssr
-
-# ==============================================================================
-# Stage 2: PHP Dependencies
-# ==============================================================================
-FROM composer:2 AS composer
+FROM composer:2 AS composer-base
 
 WORKDIR /app
 
@@ -46,6 +25,39 @@ COPY . .
 
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize --no-dev
+
+# ==============================================================================
+# Stage 2: Frontend Build (Node.js with PHP for Wayfinder)
+# ==============================================================================
+FROM php:8.2-cli-alpine AS frontend
+
+WORKDIR /app
+
+# Install Node.js
+RUN apk add --no-cache nodejs npm
+
+# Copy package files
+COPY package*.json ./
+
+# Install node dependencies
+RUN npm ci --only=production=false
+
+# Copy necessary files for Wayfinder to work
+COPY --from=composer-base /app/vendor ./vendor
+COPY artisan ./
+COPY config ./config
+COPY routes ./routes
+COPY app ./app
+COPY bootstrap ./bootstrap
+COPY database ./database
+
+# Copy frontend source
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.ts tsconfig.json components.json ./
+
+# Build assets (CSR + SSR) - Wayfinder can now call php artisan
+RUN npm run build && npm run build:ssr
 
 # ==============================================================================
 # Stage 3: Production Runtime (PHP + Nginx)
@@ -92,7 +104,7 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
 WORKDIR /app
 
 # Copy application files from build stages
-COPY --from=composer /app/vendor ./vendor
+COPY --from=composer-base /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
 COPY --from=frontend /app/bootstrap/ssr ./bootstrap/ssr
 COPY . .
