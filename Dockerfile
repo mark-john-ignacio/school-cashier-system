@@ -22,6 +22,9 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-in
 # Copy application code
 COPY . .
 
+# Make release script executable
+RUN chmod +x release.sh
+
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize --no-dev
 
