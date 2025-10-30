@@ -1,0 +1,87 @@
+{
+    "name": "school-cashier-system",
+    "description": "Modern school payment management system with Laravel, Inertia.js, and React",
+    "keywords": ["laravel", "inertia", "react", "typescript", "school", "cashier", "payment"],
+    "repository": "https://github.com/mark-john-ignacio/school-cashier-system",
+    "logo": "https://via.placeholder.com/200x200/FF2D20/FFFFFF?text=SCS",
+    "success_url": "/",
+    "scripts": {
+        "dokku": {
+            "predeploy": "echo 'Starting deployment...'",
+            "postdeploy": "php artisan storage:link || true"
+        }
+    },
+    "env": {
+        "APP_NAME": {
+            "description": "Application name",
+            "value": "School Cashier System",
+            "required": false
+        },
+        "APP_ENV": {
+            "description": "Application environment",
+            "value": "production",
+            "required": true
+        },
+        "APP_DEBUG": {
+            "description": "Enable debug mode (should be false in production)",
+            "value": "false",
+            "required": true
+        },
+        "APP_KEY": {
+            "description": "Application encryption key (generate with: php artisan key:generate --show)",
+            "required": true
+        },
+        "APP_URL": {
+            "description": "Application URL (e.g., https://your-app.dokku.example.com)",
+            "required": true
+        },
+        "DB_CONNECTION": {
+            "description": "Database connection type",
+            "value": "mysql",
+            "required": false
+        },
+        "SESSION_DRIVER": {
+            "description": "Session storage driver",
+            "value": "database",
+            "required": false
+        },
+        "CACHE_STORE": {
+            "description": "Cache storage driver",
+            "value": "database",
+            "required": false
+        },
+        "QUEUE_CONNECTION": {
+            "description": "Queue connection type",
+            "value": "database",
+            "required": false
+        },
+        "INERTIA_SSR_ENABLED": {
+            "description": "Enable Inertia.js server-side rendering",
+            "value": "true",
+            "required": false
+        },
+        "INERTIA_SSR_URL": {
+            "description": "Inertia SSR server URL",
+            "value": "http://127.0.0.1:13714",
+            "required": false
+        },
+        "LOG_CHANNEL": {
+            "description": "Logging channel",
+            "value": "stack",
+            "required": false
+        },
+        "LOG_LEVEL": {
+            "description": "Minimum log level",
+            "value": "error",
+            "required": false
+        }
+    },
+    "formation": {
+        "web": {
+            "quantity": 1,
+            "size": "basic"
+        }
+    },
+    "buildpacks": [],
+    "stack": "heroku-22"
+}
