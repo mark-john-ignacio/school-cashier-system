@@ -17,7 +17,7 @@ RUN npm ci --only=production=false
 # Copy frontend source
 COPY resources ./resources
 COPY public ./public
-COPY vite.config.ts tsconfig.json tailwind.config.js components.json ./
+COPY vite.config.ts tsconfig.json components.json ./
 
 # Build assets (CSR + SSR)
 RUN npm run build && npm run build:ssr
