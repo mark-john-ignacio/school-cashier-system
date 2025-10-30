@@ -13,9 +13,8 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        // Only enable Wayfinder in development (Docker builds use pre-generated routes)
+        ...(process.env.NODE_ENV !== 'production' ? [wayfinder({ formVariants: true })] : []),
     ],
     esbuild: {
         jsx: 'automatic',
