@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 /**
 * @see \App\Http\Controllers\Settings\SectionController::store
  * @see app/Http/Controllers/Settings/SectionController.php:14
- * @route '/academics/sections'
+ * @route '/admin/academics/sections'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -11,13 +11,13 @@ export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => (
 
 store.definition = {
     methods: ["post"],
-    url: '/academics/sections',
+    url: '/admin/academics/sections',
 } satisfies RouteDefinition<["post"]>
 
 /**
 * @see \App\Http\Controllers\Settings\SectionController::store
  * @see app/Http/Controllers/Settings/SectionController.php:14
- * @route '/academics/sections'
+ * @route '/admin/academics/sections'
  */
 store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options)
@@ -26,7 +26,7 @@ store.url = (options?: RouteQueryOptions) => {
 /**
 * @see \App\Http\Controllers\Settings\SectionController::store
  * @see app/Http/Controllers/Settings/SectionController.php:14
- * @route '/academics/sections'
+ * @route '/admin/academics/sections'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -36,7 +36,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     /**
 * @see \App\Http\Controllers\Settings\SectionController::store
  * @see app/Http/Controllers/Settings/SectionController.php:14
- * @route '/academics/sections'
+ * @route '/admin/academics/sections'
  */
     const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: store.url(options),
@@ -46,7 +46,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
             /**
 * @see \App\Http\Controllers\Settings\SectionController::store
  * @see app/Http/Controllers/Settings/SectionController.php:14
- * @route '/academics/sections'
+ * @route '/admin/academics/sections'
  */
         storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: store.url(options),
@@ -57,7 +57,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 /**
 * @see \App\Http\Controllers\Settings\SectionController::update
  * @see app/Http/Controllers/Settings/SectionController.php:32
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
 export const update = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
@@ -66,13 +66,13 @@ export const update = (args: { section: number | { id: number } } | [section: nu
 
 update.definition = {
     methods: ["put"],
-    url: '/academics/sections/{section}',
+    url: '/admin/academics/sections/{section}',
 } satisfies RouteDefinition<["put"]>
 
 /**
 * @see \App\Http\Controllers\Settings\SectionController::update
  * @see app/Http/Controllers/Settings/SectionController.php:32
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
 update.url = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -105,7 +105,7 @@ update.url = (args: { section: number | { id: number } } | [section: number | { 
 /**
 * @see \App\Http\Controllers\Settings\SectionController::update
  * @see app/Http/Controllers/Settings/SectionController.php:32
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
 update.put = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
@@ -115,7 +115,7 @@ update.put = (args: { section: number | { id: number } } | [section: number | { 
     /**
 * @see \App\Http\Controllers\Settings\SectionController::update
  * @see app/Http/Controllers/Settings/SectionController.php:32
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
     const updateForm = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
@@ -130,7 +130,7 @@ update.put = (args: { section: number | { id: number } } | [section: number | { 
             /**
 * @see \App\Http\Controllers\Settings\SectionController::update
  * @see app/Http/Controllers/Settings/SectionController.php:32
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
         updateForm.put = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
@@ -146,7 +146,7 @@ update.put = (args: { section: number | { id: number } } | [section: number | { 
 /**
 * @see \App\Http\Controllers\Settings\SectionController::destroy
  * @see app/Http/Controllers/Settings/SectionController.php:50
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
 export const destroy = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
@@ -155,13 +155,13 @@ export const destroy = (args: { section: number | { id: number } } | [section: n
 
 destroy.definition = {
     methods: ["delete"],
-    url: '/academics/sections/{section}',
+    url: '/admin/academics/sections/{section}',
 } satisfies RouteDefinition<["delete"]>
 
 /**
 * @see \App\Http\Controllers\Settings\SectionController::destroy
  * @see app/Http/Controllers/Settings/SectionController.php:50
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
 destroy.url = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -194,7 +194,7 @@ destroy.url = (args: { section: number | { id: number } } | [section: number | {
 /**
 * @see \App\Http\Controllers\Settings\SectionController::destroy
  * @see app/Http/Controllers/Settings/SectionController.php:50
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
 destroy.delete = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
@@ -204,7 +204,7 @@ destroy.delete = (args: { section: number | { id: number } } | [section: number 
     /**
 * @see \App\Http\Controllers\Settings\SectionController::destroy
  * @see app/Http/Controllers/Settings/SectionController.php:50
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
     const destroyForm = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
@@ -219,7 +219,7 @@ destroy.delete = (args: { section: number | { id: number } } | [section: number 
             /**
 * @see \App\Http\Controllers\Settings\SectionController::destroy
  * @see app/Http/Controllers/Settings/SectionController.php:50
- * @route '/academics/sections/{section}'
+ * @route '/admin/academics/sections/{section}'
  */
         destroyForm.delete = (args: { section: number | { id: number } } | [section: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {

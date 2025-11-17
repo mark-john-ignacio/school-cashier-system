@@ -75,7 +75,7 @@ export default function About() {
                 </div>
                 <div className="flex-1 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-slate-100">
                     <img
-                        src="https://placehold.co/800x600/1d4ed8/f8fafc?text=Dei+Gratia+Campus"
+                        src="/images/marketing/about-collab.jpg"
                         alt="Students collaborating inside Dei Gratia School"
                         className="h-full w-full object-cover"
                         loading="lazy"
@@ -113,7 +113,10 @@ export default function About() {
                 <h2 className="mt-3 text-3xl font-semibold text-slate-900">A legacy of community firsts.</h2>
                 <div className="mt-10 space-y-6">
                     {milestones.map((milestone) => (
-                        <div key={milestone.year} className="rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                        <div
+                            key={milestone.year}
+                            className="rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                        >
                             <p className="text-sm font-semibold tracking-[0.5em] text-slate-500 uppercase">{milestone.year}</p>
                             <h3 className="mt-2 text-2xl font-semibold text-slate-900">{milestone.title}</h3>
                             <p className="mt-2 text-base text-slate-600">{milestone.description}</p>

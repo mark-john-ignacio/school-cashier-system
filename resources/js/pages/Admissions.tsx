@@ -49,7 +49,7 @@ export default function Admissions() {
                 <div className="relative overflow-hidden rounded-4xl border border-amber-100 bg-amber-50/70 px-8 py-12 text-blue-950 shadow-[0_30px_80px_-40px_rgba(15,23,42,.7)]">
                     <div className="absolute inset-0">
                         <img
-                            src="https://placehold.co/1200x700/fbbf24/0f172a?text=Admissions+Center"
+                            src="/images/marketing/admissions-team.jpg"
                             alt="Admissions team assisting families"
                             className="h-full w-full object-cover"
                             loading="lazy"
@@ -147,7 +147,10 @@ export default function Admissions() {
                 <p className="text-sm font-semibold tracking-wide text-blue-600 uppercase">Tuition Highlights</p>
                 <div className="mt-6 grid gap-6 md:grid-cols-4">
                     {tuitionHighlights.map((item) => (
-                        <Card key={item.label} className="border-slate-200/60 bg-white/95 text-center shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl">
+                        <Card
+                            key={item.label}
+                            className="border-slate-200/60 bg-white/95 text-center shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+                        >
                             <CardContent className="space-y-2 px-6 py-6">
                                 <p className="text-sm font-semibold tracking-wide text-slate-500 uppercase">{item.label}</p>
                                 <p className="text-xl font-semibold text-slate-900">{item.detail}</p>

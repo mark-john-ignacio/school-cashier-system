@@ -54,7 +54,7 @@ export default function Home() {
         <MainLayout title="Dei Gratia School Inc. | Home" className="bg-gradient-to-b from-white via-slate-50 to-white">
             <section className="relative isolate flex min-h-[65vh] items-center overflow-hidden rounded-b-[3.5rem] bg-slate-900 shadow-[0_25px_60px_rgba(15,23,42,0.35)]">
                 <img
-                    src="https://placehold.co/1600x800/60a5fa/334155?text=Future+Leaders"
+                    src="/images/marketing/home-hero.jpg"
                     alt="Students of Dei Gratia School Inc."
                     className="absolute inset-0 h-full w-full object-cover"
                     loading="lazy"
@@ -77,12 +77,12 @@ export default function Home() {
                 </div>
             </section>
 
-            <section className="-mt-12 mx-auto w-full max-w-5xl rounded-3xl border border-white/70 bg-white/90 px-6 py-8 shadow-2xl backdrop-blur">
+            <section className="mx-auto -mt-12 w-full max-w-5xl rounded-3xl border border-white/70 bg-white/90 px-6 py-8 shadow-2xl backdrop-blur">
                 <div className="grid gap-6 text-center sm:grid-cols-2 lg:grid-cols-4">
                     {impactStats.map((stat) => (
                         <div key={stat.label} className="space-y-1">
                             <p className="text-3xl font-semibold text-slate-900">{stat.value}</p>
-                            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-500">{stat.label}</p>
+                            <p className="text-xs font-semibold tracking-[0.4em] text-slate-500 uppercase">{stat.label}</p>
                         </div>
                     ))}
                 </div>
@@ -92,7 +92,7 @@ export default function Home() {
                 <div className="grid gap-10 md:grid-cols-2 md:items-center">
                     <div className="overflow-hidden rounded-3xl shadow-xl ring-1 ring-slate-100">
                         <img
-                            src="https://placehold.co/600x400/e2e8f0/64748b?text=Our+Campus"
+                            src="/images/marketing/home-campus.jpg"
                             alt="Dei Gratia School campus"
                             className="h-full w-full object-cover"
                             loading="lazy"

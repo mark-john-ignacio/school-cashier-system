@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'logo' => env('APP_LOGO', '/images/branding/logo.svg'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

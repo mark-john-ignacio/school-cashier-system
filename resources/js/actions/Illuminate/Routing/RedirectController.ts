@@ -190,117 +190,117 @@ RedirectController4b87d2df7e3aa853f6720faea796e36c.options = (options?: RouteQue
     /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-const RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+const RedirectController721c0b4d6808e23c7f2b93ba7216661d = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'get',
 })
 
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.definition = {
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.definition = {
     methods: ["get","head","post","put","patch","delete","options"],
-    url: '/academics',
+    url: '/admin/academics',
 } satisfies RouteDefinition<["get","head","post","put","patch","delete","options"]>
 
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url = (options?: RouteQueryOptions) => {
-    return RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.definition.url + queryParams(options)
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.url = (options?: RouteQueryOptions) => {
+    return RedirectController721c0b4d6808e23c7f2b93ba7216661d.definition.url + queryParams(options)
 }
 
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'get',
 })
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'head',
 })
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'post',
 })
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'put',
 })
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'patch',
 })
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'delete',
 })
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
-    url: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+RedirectController721c0b4d6808e23c7f2b93ba7216661d.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
+    url: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
     method: 'options',
 })
 
     /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-    const RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+    const RedirectController721c0b4d6808e23c7f2b93ba7216661dForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
         method: 'get',
     })
 
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-        RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+        RedirectController721c0b4d6808e23c7f2b93ba7216661dForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
             method: 'get',
         })
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-        RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url({
+        RedirectController721c0b4d6808e23c7f2b93ba7216661dForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url({
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
                             ...(options?.query ?? options?.mergeQuery ?? {}),
@@ -311,19 +311,19 @@ RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.options = (options?: RouteQue
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-        RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url(options),
+        RedirectController721c0b4d6808e23c7f2b93ba7216661dForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url(options),
             method: 'post',
         })
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-        RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url({
+        RedirectController721c0b4d6808e23c7f2b93ba7216661dForm.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url({
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PUT',
                             ...(options?.query ?? options?.mergeQuery ?? {}),
@@ -334,10 +334,10 @@ RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.options = (options?: RouteQue
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-        RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url({
+        RedirectController721c0b4d6808e23c7f2b93ba7216661dForm.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url({
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
                             ...(options?.query ?? options?.mergeQuery ?? {}),
@@ -348,10 +348,10 @@ RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.options = (options?: RouteQue
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-        RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url({
+        RedirectController721c0b4d6808e23c7f2b93ba7216661dForm.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url({
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',
                             ...(options?.query ?? options?.mergeQuery ?? {}),
@@ -362,10 +362,10 @@ RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.options = (options?: RouteQue
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
-        RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form.options = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.url({
+        RedirectController721c0b4d6808e23c7f2b93ba7216661dForm.options = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: RedirectController721c0b4d6808e23c7f2b93ba7216661d.url({
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'OPTIONS',
                             ...(options?.query ?? options?.mergeQuery ?? {}),
@@ -374,11 +374,11 @@ RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.options = (options?: RouteQue
             method: 'get',
         })
     
-    RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80.form = RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80Form
+    RedirectController721c0b4d6808e23c7f2b93ba7216661d.form = RedirectController721c0b4d6808e23c7f2b93ba7216661dForm
 
 const RedirectController = {
     '/settings': RedirectController4b87d2df7e3aa853f6720faea796e36c,
-    '/academics': RedirectController24161bb8c5dd935bc8d3dfaf6d6a1c80,
+    '/admin/academics': RedirectController721c0b4d6808e23c7f2b93ba7216661d,
 }
 
 export default RedirectController

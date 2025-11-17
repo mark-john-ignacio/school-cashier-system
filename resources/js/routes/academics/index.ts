@@ -5,7 +5,7 @@ import feeStructures from './fee-structures'
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 export const home = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: home.url(options),
@@ -14,13 +14,13 @@ export const home = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 home.definition = {
     methods: ["get","head","post","put","patch","delete","options"],
-    url: '/academics',
+    url: '/admin/academics',
 } satisfies RouteDefinition<["get","head","post","put","patch","delete","options"]>
 
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.url = (options?: RouteQueryOptions) => {
     return home.definition.url + queryParams(options)
@@ -29,7 +29,7 @@ home.url = (options?: RouteQueryOptions) => {
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: home.url(options),
@@ -38,7 +38,7 @@ home.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: home.url(options),
@@ -47,7 +47,7 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: home.url(options),
@@ -56,7 +56,7 @@ home.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: home.url(options),
@@ -65,7 +65,7 @@ home.put = (options?: RouteQueryOptions): RouteDefinition<'put'> => ({
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: home.url(options),
@@ -74,7 +74,7 @@ home.patch = (options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: home.url(options),
@@ -83,7 +83,7 @@ home.delete = (options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
 /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
 home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
     url: home.url(options),
@@ -93,7 +93,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
     /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
     const homeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: home.url(options),
@@ -103,7 +103,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
         homeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: home.url(options),
@@ -112,7 +112,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
         homeForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: home.url({
@@ -126,7 +126,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
         homeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: home.url(options),
@@ -135,7 +135,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
         homeForm.put = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: home.url({
@@ -149,7 +149,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
         homeForm.patch = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: home.url({
@@ -163,7 +163,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
         homeForm.delete = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: home.url({
@@ -177,7 +177,7 @@ home.options = (options?: RouteQueryOptions): RouteDefinition<'options'> => ({
             /**
 * @see \Illuminate\Routing\RedirectController::__invoke
  * @see vendor/laravel/framework/src/Illuminate/Routing/RedirectController.php:19
- * @route '/academics'
+ * @route '/admin/academics'
  */
         homeForm.options = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: home.url({

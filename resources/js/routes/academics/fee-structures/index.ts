@@ -2,7 +2,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::index
  * @see app/Http/Controllers/Settings/FeeStructureController.php:17
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(options),
@@ -11,13 +11,13 @@ export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 index.definition = {
     methods: ["get","head"],
-    url: '/academics/fee-structures',
+    url: '/admin/academics/fee-structures',
 } satisfies RouteDefinition<["get","head"]>
 
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::index
  * @see app/Http/Controllers/Settings/FeeStructureController.php:17
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
 index.url = (options?: RouteQueryOptions) => {
     return index.definition.url + queryParams(options)
@@ -26,7 +26,7 @@ index.url = (options?: RouteQueryOptions) => {
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::index
  * @see app/Http/Controllers/Settings/FeeStructureController.php:17
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(options),
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::index
  * @see app/Http/Controllers/Settings/FeeStructureController.php:17
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(options),
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::index
  * @see app/Http/Controllers/Settings/FeeStructureController.php:17
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
     const indexForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: index.url(options),
@@ -55,7 +55,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::index
  * @see app/Http/Controllers/Settings/FeeStructureController.php:17
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
         indexForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url(options),
@@ -64,7 +64,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
             /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::index
  * @see app/Http/Controllers/Settings/FeeStructureController.php:17
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
         indexForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url({
@@ -80,7 +80,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::store
  * @see app/Http/Controllers/Settings/FeeStructureController.php:78
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -89,13 +89,13 @@ export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => (
 
 store.definition = {
     methods: ["post"],
-    url: '/academics/fee-structures',
+    url: '/admin/academics/fee-structures',
 } satisfies RouteDefinition<["post"]>
 
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::store
  * @see app/Http/Controllers/Settings/FeeStructureController.php:78
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
 store.url = (options?: RouteQueryOptions) => {
     return store.definition.url + queryParams(options)
@@ -104,7 +104,7 @@ store.url = (options?: RouteQueryOptions) => {
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::store
  * @see app/Http/Controllers/Settings/FeeStructureController.php:78
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(options),
@@ -114,7 +114,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::store
  * @see app/Http/Controllers/Settings/FeeStructureController.php:78
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
     const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: store.url(options),
@@ -124,7 +124,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
             /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::store
  * @see app/Http/Controllers/Settings/FeeStructureController.php:78
- * @route '/academics/fee-structures'
+ * @route '/admin/academics/fee-structures'
  */
         storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: store.url(options),
@@ -135,7 +135,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::update
  * @see app/Http/Controllers/Settings/FeeStructureController.php:97
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
 export const update = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
@@ -144,13 +144,13 @@ export const update = (args: { feeStructure: number | { id: number } } | [feeStr
 
 update.definition = {
     methods: ["put"],
-    url: '/academics/fee-structures/{feeStructure}',
+    url: '/admin/academics/fee-structures/{feeStructure}',
 } satisfies RouteDefinition<["put"]>
 
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::update
  * @see app/Http/Controllers/Settings/FeeStructureController.php:97
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
 update.url = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -183,7 +183,7 @@ update.url = (args: { feeStructure: number | { id: number } } | [feeStructure: n
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::update
  * @see app/Http/Controllers/Settings/FeeStructureController.php:97
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
 update.put = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
@@ -193,7 +193,7 @@ update.put = (args: { feeStructure: number | { id: number } } | [feeStructure: n
     /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::update
  * @see app/Http/Controllers/Settings/FeeStructureController.php:97
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
     const updateForm = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
@@ -208,7 +208,7 @@ update.put = (args: { feeStructure: number | { id: number } } | [feeStructure: n
             /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::update
  * @see app/Http/Controllers/Settings/FeeStructureController.php:97
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
         updateForm.put = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
@@ -224,7 +224,7 @@ update.put = (args: { feeStructure: number | { id: number } } | [feeStructure: n
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::destroy
  * @see app/Http/Controllers/Settings/FeeStructureController.php:116
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
 export const destroy = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
@@ -233,13 +233,13 @@ export const destroy = (args: { feeStructure: number | { id: number } } | [feeSt
 
 destroy.definition = {
     methods: ["delete"],
-    url: '/academics/fee-structures/{feeStructure}',
+    url: '/admin/academics/fee-structures/{feeStructure}',
 } satisfies RouteDefinition<["delete"]>
 
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::destroy
  * @see app/Http/Controllers/Settings/FeeStructureController.php:116
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
 destroy.url = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
@@ -272,7 +272,7 @@ destroy.url = (args: { feeStructure: number | { id: number } } | [feeStructure: 
 /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::destroy
  * @see app/Http/Controllers/Settings/FeeStructureController.php:116
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
 destroy.delete = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
@@ -282,7 +282,7 @@ destroy.delete = (args: { feeStructure: number | { id: number } } | [feeStructur
     /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::destroy
  * @see app/Http/Controllers/Settings/FeeStructureController.php:116
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
     const destroyForm = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
@@ -297,7 +297,7 @@ destroy.delete = (args: { feeStructure: number | { id: number } } | [feeStructur
             /**
 * @see \App\Http\Controllers\Settings\FeeStructureController::destroy
  * @see app/Http/Controllers/Settings/FeeStructureController.php:116
- * @route '/academics/fee-structures/{feeStructure}'
+ * @route '/admin/academics/fee-structures/{feeStructure}'
  */
         destroyForm.delete = (args: { feeStructure: number | { id: number } } | [feeStructure: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {

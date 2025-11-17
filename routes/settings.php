@@ -26,8 +26,8 @@ Route::middleware('auth')->group(function () {
     })->name('appearance');
 });
 
-Route::middleware('auth')->prefix('academics')->name('academics.')->group(function () {
-    Route::redirect('/', '/academics/grade-levels')->name('home');
+Route::middleware('auth')->prefix('admin/academics')->name('academics.')->group(function () {
+    Route::redirect('/', '/admin/academics/grade-levels')->name('home');
 
     Route::get('grade-levels', [GradeLevelController::class, 'index'])->name('grade-levels.index');
     Route::post('grade-levels', [GradeLevelController::class, 'store'])->name('grade-levels.store');

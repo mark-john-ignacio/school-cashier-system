@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { about, academics, admissions, contact, home } from '@/routes';
-import { Head, Link, type InertiaLinkProps } from '@inertiajs/react';
+import { Head, Link, usePage, type InertiaLinkProps } from '@inertiajs/react';
 import { Menu, School } from 'lucide-react';
 import { type PropsWithChildren } from 'react';
 
@@ -32,9 +32,37 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children, title, description, className }: PropsWithChildren<MainLayoutProps>) {
-    const seoTitle = title ?? 'Dei Gratia School Inc. | Excellence in Community Education';
+    const { props } = usePage<{ branding?: { name?: string; logo?: string } }>();
+    const branding = props.branding ?? {};
+    const brandName = branding.name ?? 'Dei Gratia School Inc.';
+    const brandLogo = branding.logo;
+
+    const seoTitle = title ?? `${brandName} | Excellence in Community Education`;
     const seoDescription =
-        description ?? 'Dei Gratia School Inc. delivers faith-driven, community-focused K-12 education for future-ready learners in Tanza, Cavite.';
+        description ?? `${brandName} delivers faith-driven, community-focused K-12 education for future-ready learners in Tanza, Cavite.`;
+
+    const renderBrandSymbol = (variant: 'default' | 'footer' = 'default') => {
+        if (brandLogo) {
+            return (
+                <img
+                    src={brandLogo}
+                    alt={`${brandName} logo`}
+                    className={cn('h-10 w-10 rounded-full object-cover', variant === 'footer' ? 'border border-white/10 bg-white/10 p-2' : '')}
+                />
+            );
+        }
+
+        const variantClasses =
+            variant === 'footer'
+                ? 'bg-white/10 text-white'
+                : 'bg-blue-100 text-blue-600';
+
+        return (
+            <span className={cn('rounded-full p-2', variantClasses)}>
+                <School className="h-5 w-5" />
+            </span>
+        );
+    };
 
     return (
         <div className="flex min-h-screen flex-col bg-slate-50">
@@ -46,15 +74,18 @@ export default function MainLayout({ children, title, description, className }: 
             <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 shadow-[0_1px_12px_rgba(15,23,42,0.08)] backdrop-blur supports-[backdrop-filter]:bg-white/65">
                 <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                     <Link href={home()} className="flex items-center gap-2" prefetch>
-                        <span className="rounded-full bg-blue-100 p-2 text-blue-600">
-                            <School className="h-5 w-5" />
-                        </span>
-                        <span className="text-base font-semibold text-slate-900 sm:text-lg">Dei Gratia School Inc.</span>
+                        {renderBrandSymbol()}
+                        <span className="text-base font-semibold text-slate-900 sm:text-lg">{brandName}</span>
                     </Link>
 
                     <nav className="hidden items-center gap-6 text-sm font-medium text-slate-700 md:flex">
                         {navigationLinks.map((link) => (
-                            <Link key={link.label} href={link.href} className="rounded-full px-3 py-1 transition hover:bg-blue-50 hover:text-blue-700" prefetch>
+                            <Link
+                                key={link.label}
+                                href={link.href}
+                                className="rounded-full px-3 py-1 transition hover:bg-blue-50 hover:text-blue-700"
+                                prefetch
+                            >
                                 {link.label}
                             </Link>
                         ))}
@@ -74,11 +105,9 @@ export default function MainLayout({ children, title, description, className }: 
                         </SheetTrigger>
                         <SheetContent side="left" className="bg-white/95 px-6 pt-12 pb-10">
                             <div className="mb-8 flex items-center gap-2 text-slate-900">
-                                <span className="rounded-full bg-blue-100 p-2 text-blue-600">
-                                    <School className="h-5 w-5" />
-                                </span>
+                                {renderBrandSymbol()}
                                 <div>
-                                    <p className="text-sm tracking-wide text-slate-500 uppercase">Dei Gratia School</p>
+                                    <p className="text-sm tracking-wide text-slate-500 uppercase">{brandName}</p>
                                     <p className="text-lg font-semibold">Main Menu</p>
                                 </div>
                             </div>
@@ -114,8 +143,8 @@ export default function MainLayout({ children, title, description, className }: 
                     <div className="grid gap-10 md:grid-cols-3">
                         <div>
                             <div className="flex items-center gap-2 text-lg font-semibold">
-                                <School className="h-5 w-5" />
-                                Dei Gratia School Inc.
+                                {renderBrandSymbol('footer')}
+                                {brandName}
                             </div>
                             <p className="mt-4 text-sm leading-relaxed text-blue-100">Blk 18&amp;19, Ph1B Carissa Homes, Bagtas, Tanza, Cavite</p>
                             <a href="tel:+63468630045" className="mt-2 block text-sm font-medium text-blue-100 hover:text-yellow-200">
