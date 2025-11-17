@@ -47,15 +47,12 @@ export default function MainLayout({ children, title, description, className }: 
                 <img
                     src={brandLogo}
                     alt={`${brandName} logo`}
-                    className={cn('h-10 w-10 rounded-full object-cover', variant === 'footer' ? 'border border-white/10 bg-white/10 p-2' : '')}
+                    className={cn('h-10 w-auto object-contain', variant === 'footer' ? 'drop-shadow-[0_6px_18px_rgba(15,23,42,0.45)]' : '')}
                 />
             );
         }
 
-        const variantClasses =
-            variant === 'footer'
-                ? 'bg-white/10 text-white'
-                : 'bg-blue-100 text-blue-600';
+        const variantClasses = variant === 'footer' ? 'bg-white/10 text-white' : 'bg-blue-100 text-blue-600';
 
         return (
             <span className={cn('rounded-full p-2', variantClasses)}>
