@@ -95,7 +95,7 @@ export default function MainLayout({ children, title, description, className }: 
 
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="md:hidden">
+                            <Button variant="outline" size="icon" className="md:hidden border-slate-300 text-slate-900 bg-white/80 backdrop-blur hover:bg-white">
                                 <Menu className="h-5 w-5" />
                                 <span className="sr-only">Toggle menu</span>
                             </Button>

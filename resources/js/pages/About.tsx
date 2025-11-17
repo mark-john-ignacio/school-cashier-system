@@ -68,7 +68,11 @@ export default function About() {
                         <Button asChild className="bg-yellow-400 text-blue-950 shadow-lg hover:bg-yellow-300">
                             <Link href={admissions()}>Explore Admissions</Link>
                         </Button>
-                        <Button variant="outline" asChild className="border-slate-200 text-slate-900">
+                        <Button
+                            variant="outline"
+                            asChild
+                            className="border-white/60 bg-white/10 text-white backdrop-blur transition hover:bg-white/30 hover:text-white"
+                        >
                             <Link href={contact()}>Talk to Us</Link>
                         </Button>
                     </div>
