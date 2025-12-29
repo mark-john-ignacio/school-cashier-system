@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class PaymentService
 {
+    public function __construct(protected StudentService $studentService)
+    {
+    }
+
     /**
      * Record a new payment for a student.
      *
@@ -323,7 +327,7 @@ class PaymentService
      */
     public function calculateStudentBalance(Student $student): float
     {
-        return $student->balance;
+        return $this->studentService->calculateBalance($student);
     }
 
     /**

@@ -7,11 +7,17 @@ use App\Http\Requests\UpdateStudentRequest;
 use App\Models\GradeLevel;
 use App\Models\Section;
 use App\Models\Student;
+use App\Services\StudentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use InvalidArgumentException;
 
 class StudentController extends Controller
 {
+    public function __construct(protected StudentService $studentService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -33,7 +39,7 @@ class StudentController extends Controller
         }
 
         $gradeLevelFilterInput = $request->input('grade_level');
-        $resolvedGradeLevel = $this->resolveGradeLevel($gradeLevelFilterInput);
+        $resolvedGradeLevel = $this->studentService->resolveGradeLevel($gradeLevelFilterInput);
 
         // Filter by grade level
         if ($request->filled('grade_level')) {
@@ -41,7 +47,7 @@ class StudentController extends Controller
         }
 
         $sectionFilterInput = $request->input('section');
-        $resolvedSection = $this->resolveSection($sectionFilterInput, $resolvedGradeLevel?->id);
+        $resolvedSection = $this->studentService->resolveSection($sectionFilterInput, $resolvedGradeLevel?->id);
 
         // Filter by section
         if ($request->filled('section')) {
@@ -73,9 +79,9 @@ class StudentController extends Controller
                 'section' => $student->section_name ?? '—',
                 'status' => $student->status,
                 'total_paid' => $student->total_paid,
-                'expected_fees' => $student->expected_fees,
-                'balance' => $student->balance,
-                'payment_status' => $student->payment_status,
+                'expected_fees' => $this->studentService->calculateExpectedFees($student),
+                'balance' => $this->studentService->calculateBalance($student),
+                'payment_status' => $this->studentService->getPaymentStatus($student),
                 'created_at' => $student->created_at,
             ];
         });
@@ -152,32 +158,14 @@ class StudentController extends Controller
      */
     public function store(StoreStudentRequest $request)
     {
-        $data = $request->validated();
+        try {
+            $student = $this->studentService->createStudent($request->validated());
 
-        // Resolve grade level to id
-        $grade = $this->resolveGradeLevel($data['grade_level'] ?? null);
-
-        if (! $grade) {
-            return back()->withErrors(['grade_level' => 'Selected grade level is invalid'])->withInput();
+            return redirect('/students/' . $student->id)
+                ->with('success', 'Student added successfully.');
+        } catch (InvalidArgumentException $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
-
-        // Resolve section to id (prefer section within grade level)
-        $section = $this->resolveSection($data['section'] ?? null, $grade->id);
-
-        if (! $section) {
-            return back()->withErrors(['section' => 'Selected section is invalid'])->withInput();
-        }
-
-        // Prepare payload for mass assignment
-        $payload = $data;
-        $payload['grade_level_id'] = $grade->id;
-        $payload['section_id'] = $section->id;
-        unset($payload['grade_level'], $payload['section']);
-
-        $student = Student::create($payload);
-
-        return redirect('/students/' . $student->id)
-            ->with('success', 'Student added successfully.');
     }
 
     /**
@@ -207,9 +195,9 @@ class StudentController extends Controller
                 'status' => $student->status,
                 'notes' => $student->notes,
                 'total_paid' => $student->total_paid,
-                'expected_fees' => $student->expected_fees,
-                'balance' => $student->balance,
-                'payment_status' => $student->payment_status,
+                'expected_fees' => $this->studentService->calculateExpectedFees($student),
+                'balance' => $this->studentService->calculateBalance($student),
+                'payment_status' => $this->studentService->getPaymentStatus($student),
                 'created_at' => $student->created_at,
             ],
             'paymentHistory' => $paymentHistory->map(function ($payment) {
@@ -276,33 +264,14 @@ class StudentController extends Controller
      */
     public function update(UpdateStudentRequest $request, Student $student)
     {
-        $data = $request->validated();
+        try {
+            $this->studentService->updateStudent($student, $request->validated());
 
-        // Resolve grade level to id
-        $grade = $this->resolveGradeLevel($data['grade_level'] ?? null);
-
-        if (! $grade) {
-            return back()->withErrors(['grade_level' => 'Selected grade level is invalid'])->withInput();
+            return redirect('/students/' . $student->id)
+                ->with('success', 'Student updated successfully.');
+        } catch (InvalidArgumentException $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
-
-        // Resolve section to id (prefer section within grade level)
-        $section = $this->resolveSection($data['section'] ?? null, $grade->id);
-
-        if (! $section) {
-            return back()->withErrors(['section' => 'Selected section is invalid'])->withInput();
-        }
-
-        // Prepare payload for update and assign explicitly to avoid mass-assignment surprises
-        $payload = $data;
-        unset($payload['grade_level'], $payload['section']);
-
-        $student->fill($payload);
-        $student->grade_level_id = $grade->id;
-        $student->section_id = $section->id;
-        $student->save();
-
-        return redirect('/students/' . $student->id)
-            ->with('success', 'Student updated successfully.');
     }
 
     /**
@@ -316,42 +285,4 @@ class StudentController extends Controller
             ->with('success', 'Student deactivated successfully.');
     }
 
-    private function resolveGradeLevel(mixed $input): ?GradeLevel
-    {
-        if ($input === null || $input === '') {
-            return null;
-        }
-
-        if (is_numeric($input)) {
-            return GradeLevel::find((int) $input);
-        }
-
-        return GradeLevel::query()
-            ->where('slug', $input)
-            ->orWhere('name', $input)
-            ->first();
-    }
-
-    private function resolveSection(mixed $input, ?int $gradeLevelId = null): ?Section
-    {
-        if ($input === null || $input === '') {
-            return null;
-        }
-
-        if (is_numeric($input)) {
-            return Section::find((int) $input);
-        }
-
-        $query = Section::query()
-            ->where(function ($relation) use ($input) {
-                $relation->where('slug', $input)
-                    ->orWhere('name', $input);
-            });
-
-        if ($gradeLevelId) {
-            $query->where('grade_level_id', $gradeLevelId);
-        }
-
-        return $query->first();
-    }
 }
