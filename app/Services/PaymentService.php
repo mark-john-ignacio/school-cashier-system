@@ -16,6 +16,105 @@ class PaymentService
     }
 
     /**
+     * Get paginated payments with filtering and sorting.
+     *
+     * @param array $filters
+     * @param int $perPage
+     * @param string $sortField
+     * @param string $sortDirection
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getPayments(array $filters, int $perPage = 15, string $sortField = 'payment_date', string $sortDirection = 'desc')
+    {
+        $query = Payment::query()->with(['student', 'user']);
+
+        // Search by student name or receipt number
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('receipt_number', 'like', "%{$search}%")
+                    ->orWhereHas('student', function ($studentQuery) use ($search) {
+                        $studentQuery->search($search);
+                    });
+            });
+        }
+
+        // Filter by date range
+        if (! empty($filters['date_from']) && ! empty($filters['date_to'])) {
+            $query->dateRange($filters['date_from'], $filters['date_to']);
+        }
+
+        // Filter by payment purpose
+        if (! empty($filters['purpose'])) {
+            $query->purpose($filters['purpose']);
+        }
+
+        // Filter by cashier
+        if (! empty($filters['cashier_id'])) {
+            $query->byCashier($filters['cashier_id']);
+        }
+
+        // Filter by payment method
+        if (! empty($filters['payment_method'])) {
+            $query->where('payment_method', $filters['payment_method']);
+        }
+
+        // Sort
+        $query->orderBy($sortField, $sortDirection);
+
+        return $query->paginate($perPage)->withQueryString();
+    }
+
+    /**
+     * Get all unique payment purposes.
+     *
+     * @return array
+     */
+    public function getPaymentPurposes(): array
+    {
+        return Payment::query()
+            ->select('payment_purpose')
+            ->whereNotNull('payment_purpose')
+            ->distinct()
+            ->orderBy('payment_purpose')
+            ->pluck('payment_purpose')
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Get all cashiers (users with payment permissions).
+     *
+     * @return array
+     */
+    public function getCashiers(): array
+    {
+        return User::permission(['view payments', 'create payments'])
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get()
+            ->unique('id')
+            ->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Get payment details with relations loaded.
+     *
+     * @param Payment $payment
+     * @return Payment
+     */
+    public function getPaymentDetails(Payment $payment): Payment
+    {
+        return $payment->load(['student.gradeLevel', 'student.section', 'user']);
+    }
+
+    /**
      * Record a new payment for a student.
      *
      * Creates a payment record with an auto-generated receipt number,

@@ -136,6 +136,54 @@ class StudentService
     }
 
     /**
+     * Search students for dropdowns/autocompletes.
+     *
+     * @param string $search
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function searchStudents(string $search = '', int $limit = 10)
+    {
+        $query = Student::query()
+            ->select('id', 'student_number', 'first_name', 'middle_name', 'last_name', 'grade_level_id', 'section_id')
+            ->with(['gradeLevel:id,name', 'section:id,name'])
+            ->orderBy('last_name');
+
+        if ($search) {
+            $query->search($search);
+        } else {
+            $query->latest();
+        }
+
+        return $query->limit($limit)->get();
+    }
+
+    /**
+     * Get a student with their fee structures loaded.
+     *
+     * @param int $id
+     * @return Student|null
+     */
+    public function getStudentWithFees(int $id): ?Student
+    {
+        $student = Student::query()
+            ->with(['gradeLevel', 'section:id,name'])
+            ->find($id);
+
+        if ($student) {
+            $student->loadMissing([
+                'gradeLevel.feeStructures' => function ($query) {
+                    $query->where('is_active', true)
+                        ->orderByDesc('is_required')
+                        ->orderBy('fee_type');
+                },
+            ]);
+        }
+
+        return $student;
+    }
+
+    /**
      * Resolve grade level from input.
      *
      * @param mixed $input

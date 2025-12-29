@@ -11,7 +11,7 @@ class StorePaymentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('create payments');
     }
 
     /**
@@ -22,7 +22,29 @@ class StorePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'student_id' => ['required', 'exists:students,id'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'payment_date' => ['required', 'date'],
+            'payment_purpose' => ['required', 'string', 'max:255'],
+            'payment_method' => ['sometimes', 'in:cash,check,online'],
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'student_id.required' => 'Please select a student.',
+            'student_id.exists' => 'The selected student does not exist.',
+            'amount.required' => 'Please enter a payment amount.',
+            'amount.min' => 'The payment amount must be at least 0.01.',
+            'payment_date.required' => 'Please select a payment date.',
+            'payment_purpose.required' => 'Please specify the purpose of the payment.',
         ];
     }
 }
