@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use App\Http\Resources\StudentResource;
 use App\Models\GradeLevel;
 use App\Models\Section;
 use App\Models\Student;
@@ -64,28 +65,7 @@ class StudentController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
-        $students = $query->paginate($perPage)->withQueryString();
-
-        // Add computed attributes
-        $students->getCollection()->transform(function ($student) {
-            return [
-                'id' => $student->id,
-                'student_number' => $student->student_number,
-                'full_name' => $student->full_name,
-                'first_name' => $student->first_name,
-                'middle_name' => $student->middle_name,
-                'last_name' => $student->last_name,
-                'grade_level' => $student->grade_level_name ?? '—',
-                'section' => $student->section_name ?? '—',
-                'status' => $student->status,
-                'total_paid' => $student->total_paid,
-                'expected_fees' => $this->studentService->calculateExpectedFees($student),
-                'balance' => $this->studentService->calculateBalance($student),
-                'payment_status' => $this->studentService->getPaymentStatus($student),
-                'created_at' => $student->created_at,
-            ];
-        });
-
+        $students = StudentResource::collection($query->paginate($perPage)->withQueryString());
 
         $gradeLevels = GradeLevel::query()
             ->with(['sections' => function ($query) {
@@ -178,28 +158,7 @@ class StudentController extends Controller
         $paymentHistory = $student->payments()->orderBy('payment_date', 'desc')->get();
 
         return Inertia::render('students/show', [
-            'student' => [
-                'id' => $student->id,
-                'student_number' => $student->student_number,
-                'full_name' => $student->full_name,
-                'first_name' => $student->first_name,
-                'middle_name' => $student->middle_name,
-                'last_name' => $student->last_name,
-                'grade_level' => $student->grade_level_name ?? '—',
-                'section' => $student->section_name ?? '—',
-                'contact_number' => $student->contact_number,
-                'email' => $student->email,
-                'parent_name' => $student->parent_name,
-                'parent_contact' => $student->parent_contact,
-                'parent_email' => $student->parent_email,
-                'status' => $student->status,
-                'notes' => $student->notes,
-                'total_paid' => $student->total_paid,
-                'expected_fees' => $this->studentService->calculateExpectedFees($student),
-                'balance' => $this->studentService->calculateBalance($student),
-                'payment_status' => $this->studentService->getPaymentStatus($student),
-                'created_at' => $student->created_at,
-            ],
+            'student' => new StudentResource($student),
             'paymentHistory' => $paymentHistory->map(function ($payment) {
                 return [
                     'id' => $payment->id,
@@ -238,22 +197,7 @@ class StudentController extends Controller
             ->toArray();
 
         return Inertia::render('students/edit', [
-            'student' => [
-                'id' => $student->id,
-                'student_number' => $student->student_number,
-                'first_name' => $student->first_name,
-                'middle_name' => $student->middle_name,
-                'last_name' => $student->last_name,
-                'grade_level' => $student->gradeLevel?->id ?? '',
-                'section' => $student->section?->id ?? '',
-                'contact_number' => $student->contact_number,
-                'email' => $student->email,
-                'parent_name' => $student->parent_name,
-                'parent_contact' => $student->parent_contact,
-                'parent_email' => $student->parent_email,
-                'status' => $student->status,
-                'notes' => $student->notes,
-            ],
+            'student' => new StudentResource($student),
             'gradeLevels' => $gradeLevelOptions,
             'sectionsByGrade' => $sectionsByGrade,
         ]);
