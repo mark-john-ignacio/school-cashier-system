@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +26,7 @@ class Payment extends Model
         'payment_date',
         'payment_purpose',
         'payment_method',
+        'status',
         'notes',
         'printed_at',
     ];
@@ -38,6 +41,8 @@ class Payment extends Model
         return [
             'amount' => 'decimal:2',
             'payment_date' => 'date',
+            'payment_method' => PaymentMethod::class,
+            'status' => PaymentStatus::class,
             'printed_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',

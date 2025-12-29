@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\StudentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,6 +48,7 @@ class Student extends Model
         return [
             'grade_level_id' => 'integer',
             'section_id' => 'integer',
+            'status' => StudentStatus::class,
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
