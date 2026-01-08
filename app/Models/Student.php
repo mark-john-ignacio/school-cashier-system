@@ -41,6 +41,7 @@ class Student extends Model
     protected $appends = [
         'grade_level_name',
         'section_name',
+        'expected_fees',
     ];
 
     protected function casts(): array
@@ -162,6 +163,16 @@ class Student extends Model
     public function getSectionNameAttribute(): ?string
     {
         return $this->section?->name;
+    }
+
+    /**
+     * Get total expected fees for this student based on their grade level
+     */
+    public function getExpectedFeesAttribute(): float
+    {
+        return FeeStructure::where('grade_level_id', $this->grade_level_id)
+            ->where('is_active', true)
+            ->sum('amount');
     }
 
     /**
