@@ -66,5 +66,5 @@ it('stores and updates a student via controller routes using numeric ids', funct
 
     expect($student->grade_level_id)->toBe($newGrade->id);
     expect($student->section_id)->toBe($newSection->id);
-    expect($student->status)->toBe('inactive');
+    expect($student->status)->toBe(\App\Enums\StudentStatus::Inactive);
 });
